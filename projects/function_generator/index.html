@@ -1,0 +1,66 @@
+<html>
+<head>
+<title>
+Ben Boldt - Function Generator
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">Function Generator</font><br><br>
+</center><br>
+
+This project was intended to create a function generator, both in simulation and physically, with the following characteristics:
+<ul>
+<li>Square wave output</li>
+<li>Triangle wave output</li>
+<li>Sine wave output</li>
+<li>Sawtooth wave output</li>
+<li>Adjustable frequency</li>
+<li>Adjustable amplitude</li>
+</ul>
+I was able to implement this however I wanted, with any components available in the lab.  The output was not required to be perfect, but it was expected to be a good approximation.  This page shows only Pspice simulation images, but the physical circuit operated true to the simulation as well.  No images were taken of the physical implementation at the time because it was only for demonstration to the lab assistant, after which it was disassembled.<br><br>
+
+I started with an astable multivibrator circuit.  This produces a square wave output.  The frequency is also easily adjusted with a potentiometer.  Also, the voltage across the capacitor very closely resembles a triangle wave.  I then passed both of these two waveforms through unity gain buffers so that any load would not affect the multvibrator.<br><br>
+
+<center>
+<img src="./function_generator/square.gif"><br>
+Square Wave<br><br>
+<img src="./function_generator/triangle.gif"><br>
+Triangle Wave<br><br>
+</center>
+
+Next, I integrated the triangle wave to approximate a sine wave.  This was a straightforward approach.  It doesn't produce a perfect sine wave, but that's all we need here.<br><br>
+
+<center>
+<img src="./function_generator/sine.gif"><br><br>
+Sine wave<br>
+</center>
+
+Finally, I had to produce a sawtooth wave, which posed a real problem for me.  I was not sure how to derive a sawtooth wave from the other waves I have.  But there is a way.  I added the triangle wave to the square wave, then took the absolute value.  This produces a sawtooth wave with twice the frequency.<br><br>
+
+<center>
+<img src="./function_generator/saw.gif"><br>
+Square wave added to triangle wave<br><br>
+<img src="./function_generator/saw2.gif"><br>
+Absolute value of square + triangle<br><br>
+</center>
+
+All waves simulated at the same time demonstrates that the waves are synchronous, but the amplitudes vary.  Amplitudes were not required to be equal, so this output still meets all requirements.<br><br>
+
+<center>
+<img src="./function_generator/all_waves.gif"><br>
+All waves, somehow with the incorrect sawtooth displayed<br><br>
+</center>
+
+<a href="./function_generator/schematic.gif">Click here for the schematic.</a><br><br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

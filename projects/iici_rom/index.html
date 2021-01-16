@@ -1,0 +1,83 @@
+<html>
+<head>
+<title>
+Ben Boldt - Macintosh IIci ROM Modification
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">Macintosh IIci ROM Modification</font><br><br>
+<br>
+</center>
+
+I love old Macs.  Since I was just a whee kid, I have been opening up software and making modifications.  It started with custom icons, got to ResEdit, then blew out of all proportion when I started programming.  I always wanted to modify the startup sound of an old Mac, but I never knew how.  I looked all through the system suitcase and it was nowhere to be found.<br><br>
+
+Time went by and wisdom was acquired.  I could clearly see that the startup sound is stored in the Mac's ROM, as well as many other low-level things.  I had no way to modify the ROM however.  It's read-only, burned to chips!<br><br>
+
+Well that won't do.  I needed a Mac with socketed ROM chips that I could pull, reprogram, and stick back in.<br><br>
+
+So recently I acquired a Mac IIci that was in particularly bad shape, requiring some unsightly trace repair. I decided that I would try an experiment with this Mac.<br><br>
+
+The plan was to remove the onboard ROM DIPs, replace with sockets, and install easily reprogrammable Flash ROMs. I recently acquired some PLCC-32 to DIP-32 adapters and installed them in place of the onboard ROMs of this Mac IIci. I also rounded up some 2 Mbit Flash ROMs. These total to 1MiB of ROM, twice the original amount, which can accommodate a ROM binary from a newer 68030 Mac, for example the LC III. Whether this will "just work" is still a question. If it does, it will probably change the startup sound from the old synthesized sound to the newer sampled sound.<br><br>
+
+<center><img src="./iici_rom/iicifront.jpg"></center><br><br>
+
+To connect larger ROMs, one additional address line was needed. I actually connected two additional address lines directly from pads near the 68030 processor to the appropriate pins on the adapters for possible future expansion to a 2MiB ROM. These connections are all on the back of the logic board.<br><br>
+
+<center><img src="./iici_rom/iiciback.jpg"></center><br><br>
+
+I plan to burn these ROMs soon, first with the original 512 kiB IIci ROM to verify that everything is working, then proceeding to a 1MiB ROM from a Mac LC III. I have both of them already split into binaries for each chip, HH, MH, ML, LL. It's just a matter of finding a burner I can use.<br><br><hr><br>
+
+This project is on hold for a while because I can't find a reasonably priced ROM burner that is compatible both with these chips and my Mac (via VirtualPC). I see some cheap ones that require a parallel port but there's no possibility of a parallel port on a Mac that I know of.<br><br>
+
+In the USB area, all I can find is the TOP853 programmer for $55.<br><br>
+
+I also attempted to build a programmer from a 68HCS12 microcontroller (9S12DG256 specifically, very nice), which is somewhat successful, but all the crude handshaking makes it incredibly slow, about 1 hour per megabit, so it would take 8 hours to program all 4 2Mbit chips. Unacceptable. It also is a bit buggy, randomly programming extra 0x0D characters. I'm not sure where those are coming from.<br><br>
+
+I'm happy to say, though, that this homebrew programmer is OS X native using Zterm and a USB -> serial adapter! Too bad it's so inefficient. Using a FAT version of Zterm and a different serial adapter, this could be accomplished with any Mac as far as I'm aware. Probably you could even do it with an Apple II and Super Serial card with the right software.<br><br>
+
+Bottlenecks:
+<ul><li>Each byte is sent as 2 ascii characters, as some special characters will confuse or stop the serial transfer.</li>
+
+<li>Each pair of ascii characters is echoed back to the terminal.</li>
+
+<li>The terminal waits for the echo before sending the next character.</li>
+
+<li>XON/XOFF handshaking.</li>
+
+<li>Built-in serial send and receive functions are incredibly expensive on the microcontroller, probably on the order of 10s of milliseconds.</li>
+
+<li>Because of the expensive serial functions, increasing baud rate beyond 9600 has no effect.</li></ul>
+
+The flash chips are very versatile however and very easy to program. No additional delays will be necessary for that.
+
+<br><br><hr><br>
+
+After finding a "bad" motherboard at a thrift store for $5, I proceeded to replace the guilty power transistor and it works perfectly.  It turned to a nice little 1500 MHz Windows PC for $7.49 by the time I was done.  This gives me an LPT port!  Assuming that in the future I would have plenty of additional uses for it, I decided to jump for a $30 LPT ROM burner on eBay.  I was not able to find my AT29C020 flash ROM chips when it came however!  They are still packed up somewhere from when I moved out of my apartment in Duluth.  So I got some more of those on eBay as well.  They are AT49F040, so they can take full advantage for my two extra address lines.  This could theoretically provide a full 2 Mbytes of ROM space as opposed to the original 512 kbytes as long as the extra address lines behave as one would expect.<br><br>
+
+I burned 4 of the chips with the original Mac IIci ROM code as follows:<br>
+<ul><li>obtain known-good IIci ROM image (0x368cadfe checksum)</li>
+<li>split to 4 files, HH, MH, ML, LL by reading bytes of the original ROM in sequence HH, MH, ML, LL, HH, MH, ML, LL, HH, MH, ML, LL, etc.</li>
+<li>sequence is repeated 4 times to fill the ROM (in case the extra address bits are not working properly)</li>
+<li>erase each ROM, burn, verify, write on it, pop it into the IIci</li>
+<li>turn on IIci with grand hopes and dreams</li>
+<li>life drains from facial expression</li></ul>
+
+Unfortunately there is something wrong.  I noticed that the IIci leaves the /WE pin disconnected and these ROMs require a logic high input on /WE to work properly.  It just so happens that /WE is right beside VCC, so I bridged the solder across and fixed that little problem.  It still does not work though.  This will be one of those head scratchers I think.
+
+<br><br><hr><br>
+
+Well, after some <a href="http://68kmla.org/forums/viewtopic.php?f=29&t=13815&start=0">advice from trag at 68kmla.org</a>, I have discovered that my PLCC sockets are sketchy.  After some physical adjustment, the Mac is bootloading from the new ROM chips.  I burned them with the original Mac IIci 512 kbyte ROM.  Now I get to experiment with things.
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>
+Ben Boldt - Super Mario World NES Hack Extract
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3"> Super Mario World NES Hack Extract </font></center><br><br><br>
+
+Little known fact - "Hummer Team" of Taiwan developed and released a pirate version of Super Mario World for the original NES in 1995.  If you cruise the web long enough, you can find an NES ROM file of this game, but unfortunately the version that you will find is likely incomplete and ends at the world 4 castle.  Bummer.<br><br>
+
+<center><img src="./smw_hack_extract/title_screen.gif"></center><br><br>
+
+The 45-in-1 cartridge was another pirate that, as its name suggests, contains 45 unlicensed Nintendo games all squished into one cartridge, selectable through a menu.  Interestingly, if you reset the NES a few times it turns into a 90-in-1.  As you can imagine, it's a total hack job and full of bugs.  But this cartridge contains the FULL version of the NES Super Mario World!  However, if you wish to play this ROM in an emulator, it uses a very unique mapper to accommodate the whopping 4MB of data that it contains.  This highly restricts the number of emulators that can play this game.<br><br>
+
+It is possible to extract the Super Mario World game from this large ROM and turn it into a standalone ROM with a more common mapper so that you can play the full version on ordinary emulators.  It is a simple procedure that can be done with a hex editor.<br><br>
+
+<ol>
+<li>Acquire a 45-in-1 ROM file.  This must be a .NES (iNES) type ROM file.</li>
+<li>Create a new file in a hex editor and add this 16-byte iNES header:<br>
+4E 45 53 1A 20 20 A1 50 00 00 00 00 00 00 00 00</li>
+<li>Copy byte range 0x100010 : 0x18000F from the 45-in-1 to the end of the new file.  This contains the executable and data pages of the game.</li>
+<li>Copy byte range 0x200010 : 0x24000F from the 45-in-1 to the end of the new file.  This contains the graphics pages of the game.</li>
+</ol><br>
+
+Save it and fire up that mysterious classic in your favorite emulator!<br><br>
+
+<center><img src="./smw_hack_extract/bowsers_castle.gif"></center><br><br>
+
+<center><img src="./smw_hack_extract/smw_map_complete.gif"></center><br><br>
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>
+Ben Boldt - OmniCam Repair Project
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">OmniCam Repair Project</font><br><br>
+<br>
+
+<table width="75%" border="1" cellspacing="0" cellpadding="12" bgcolor="#B6C7D8"><tr><td>
+What ever happened with this project?<br><hr>
+Unfortunately, because of time constraints from college, it didn't make sense to volunteer at Great Lakes Aquarium after I slated this project.  I have had too many other higher priorities.  Maybe some day I'll get back to it when I have free time, but for now it's on hold.
+</td></tr></table><br><br></center>
+
+The OmniCam at Great Lakes Aquarium in Duluth has been sitting broken in the basement for quite some time.  It's an incredibly cool machine and I can't stand the sight of it sitting there, utterly useless.<br><br>
+
+OmniCam is sort of a CNC microscope that can be controlled with joysticks.  One joystick moves the scope vertically and horizontally (X and Y axes), and the other controls the focus.<br><br>
+
+The main board inside of OmniCam converts the three analog joystick axes into servo pulse signals.  This is compatible with the focusing apparatus, but the motors that move the scope along the X and Y axes are stepper motors.  So two more special boards convert the servo signals into stepper signals.<br><br>
+
+Something has gone wrong with one of the servo-to-stepper boards and a replacement is too expensive for the museum's budget.  My idea is to pull all of the boards out of the machine and start fresh with a microcontroller chip.  The microcontroller will produce both stepper signals.  These signals will be juiced up with some nice big power MOSFETs that should last forever.  The servo motor that controls the focus is damaged, so I will bypass the circuitry in there as well, and drive the contained DC motor with PWM, again produced by the microcontroller and using a MOSFET H-bridge.<br><br>
+
+Analog to Digital converters inside of the microcontroller will be used to read the position of the joysticks.  Pushing the joystick farther should make the scope move faster.  Multiple stepper motors at independent speeds are made easily possible with the internal timers of the microcontroller.  The PWM signal can also be accomplished with internal functionality.  This frees up the microcontroller to do all sorts of extra things.<br><br>
+
+Because the stepper signals are produced inside of the microcontroller, it is now possible to keep track of the precise position of the camera by counting steps.  So a storage feature could be added to store the current location of the scope, and if the visitor moves the camera, they could press a restore button to bring the scope back to the stored position.  Many other features are possible, limited only to anyone's creativity.<br><br><hr><br>
+
+At this time, I have acquired the necessary parts to start building the permanent circuit.  The microcontroller I have selected is the Microchip PIC16F877A.  Stay tuned for progress.<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

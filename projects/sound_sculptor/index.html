@@ -1,0 +1,40 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+<title>
+Ben Boldt - Sound Sculptor
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3"> Sound Sculptor </font></center><br><br><br>
+
+Sound Sculptor is a prototype that I am working on for The Works.  It is not slated as an actual project at The Works - instead it is just a strange thing I'm working on that I believe that they will like and that they may potentially find a use for it some day.<br>
+<br>
+The idea of Sound Sculptor is to draw a period of a sound wave with your hands, then be able to hear it and see it.  So I got a bunch of slider pots and analog multiplexers from China and wired them up to a $5 microcontroller.  The visitor moves all of the pots into a wave shape and the microcontroller reads the position of each pot to draw a sound wave, which it plays out through an 8-bit DAC.  There is a scope and some speakers hooked to the DAC output.  The frequency is controlled by yet another pot and there is a button to play sound.<br>
+<br>
+I made this and quickly found out that a lot of sound information that we interpret comes form the envelope of sounds.  So I added 4 more pots for an ADSR envelope.  Now you can draw the wave, change the frequency, and control the envelope.  It's a pretty nifty thing.<br>
+<br>
+What I have to think about next is the target audience.  How do you make this mean something to little kids?  Yes, they can turn all of the controls and make funny sounds - but it is important to teach something too.  I am thinking that it would certainly help to figure out some familiar sound wave and envelope shapes that visitors could enter into the machine, and get them to think about how different things affect the sound.<br>
+<br>
+It's a work in progress.
+
+<br><br><hr><br>
+
+<center><img src="./sound_sculptor/sound_sculptor_breadboard.jpg"></center>
+<br>
+<center><iframe width="420" height="315" src="http://www.youtube.com/embed/1ngCe03k1kY" frameborder="0" allowfullscreen></iframe></center>
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

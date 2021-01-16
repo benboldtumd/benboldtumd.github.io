@@ -1,0 +1,202 @@
+<html>
+<head>
+<title>
+Ben Boldt - Rob Harjes - Autonomous Vehicle
+</title>
+<base href="../" />
+</head>
+
+<body bgcolor="#408000" link="#000000" alink="#404040" vlink="#202020" background="../apple_gui/stripes.gif">
+
+<script src="./pagetop_projects_instruments.js"></script>
+
+<center><br><img src="./autonomous/title.png" width="621" height="63" alt="Autonomous Vehicle"><br></center>
+
+<font face="Arial Black" color="#FFFFFF" size="+4">
+THEORY
+</font>
+
+<table bgcolor="#AAFFAA" width="100%" border="0" cellspacing="25" cellpadding="0">
+<tr><td><font face="Lucida Grande, Arial">
+
+<!-- Start Content Area 1 -->
+
+My friend Robbie has wanted to build an autonomous vehicle for quite some time.  I found it to be quite an interesting idea.  I have the ability to build an electrical control system for such a vehicle and he has the ability to create a sophisticated software program.  The plan is to create a vehicle that can communicate using serial commands with a laptop computer.  The computer will be used to interpret various data from sensors and tell the vehicle where to go.  I personally find this project to be beneficial because most projects that I have worked on have been individual.  This will give me a chance to demonstrate my ability to collaborate with a computer scientist.  It gives me a good reason to spend time with a friend as well.<br><br>
+
+We plan to start small, with an erector set vehicle.  This will give us perspective and allow us to develop hardware and software.  From there, we plan to upgrade to a Power Wheels car.  Where it can go from there is yet unknown, but if we take the project seriously enough, we may eventually refine it to the extent of professionally controlling a full-size vehicle in a safe and controlled environment.
+
+<!-- End Content Area 1 -->
+
+</font></td>
+
+</tr>
+<tr><td height="1"><font size="-5">&nbsp;</font></td></tr> <!-- Pad -->
+</table>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+<tr><td height="1"></td></tr>
+<tr><td bgcolor="#A1E5D4" height="1"></td></tr></table>
+
+<font face="Arial Black" color="#FFFFFF" size="+4">
+IMPLEMENTATION
+</font>
+
+<table bgcolor="#99CCFF" width="100%" border="0" cellspacing="25" cellpadding="0">
+<tr><td><font face="Lucida Grande, Arial">
+
+<!-- Start Content Area 3 -->
+
+<a name="09_30_10">
+09/30/2010<br><br>
+
+Robbie and I built a vehicle out of erector set parts.  It has steering with a stepper motor and drive with a DC motor.  Very preliminary serial communication is implemented.  The vehicle can be operated by pressing keys on a computer's keyboard via a serial terminal.  Here is the current functionality:
+
+<ul><li>'l': turn 1/2 left</li>
+<li>'r': turn 1/2 right</li>
+<li>'f': go forward for 1 second</li>
+<li>'b': back up for 1 second</li></ul>
+
+We plan to issue more than 1 byte at a time, followed by a return character.  This will allow us to specify exactly how many degrees to turn the steering from the computer.  Forward and reverse could also be toggled instead of timed.  We plan to use PWM with the DC drive motor and introduce a feedback loop so we can regulate the speed.  We also plan to allow specification of speed via serial.<br><br>
+
+We had to use just one drive wheel in the center because neither of us have a differential gearbox.  Without such a gearbox, the vehicle could not turn smoothly.<br><br>
+
+The board used is a MiniDragon+, which has a powerful MC9S12DG256 microcontroller.  (68HC12 family.)  Power is applied to the stepper motor using four N-channel power mosfets.  Forward and reverse is achieved by switching a relay that reverses the current.  This was cheaper than an H-bridge with my available parts.  The relay coil and drive motor power are also controlled with power mosfets.  Because of this setup, the speed of the drive motor can easily be controlled with a PWM signal.  Even more convenient is that the microcontroller has some built-in PWM channels.<br><br>
+
+<center><img src="./autonomous/erector1.jpg" width="704" height="528"></center><br><br>
+
+<center><img src="./autonomous/erector2.jpg" width="704" height="528"></center><br><br>
+
+<center><img src="./autonomous/erector3.jpg" width="704" height="528"></center><br><br>
+
+<center><img src="./autonomous/erector4.jpg" width="704" height="528"></center><br><br>
+
+<hr><br>
+
+<a name="10_05_10">
+10/05/2010<br><br>
+
+Today I received a Bluetooth to serial adapter, as well as a small USB Bluetooth host adapter.  This will allow us to have a wireless serial connection via Bluetooth.  If we get this to work and mount batteries, the car will be completely wireless.<br><br>
+
+<center><img src="./autonomous/bluetooth.jpg" width="704" height="528"></center><br><br>
+
+<hr><br>
+
+<a name="10_06_10">
+10/06/2010<br><br>
+
+Have a look at this:<br><br>
+
+<center><img src="./autonomous/antenna.jpg" width="704" height="528"></center><br><br>
+
+The MiniDragon+ has a phone jack connector for serial, so I found a chopped off phone cord and connected it.  I also had to add a voltage regulator because the wireless board requires 3.3V.  I used an LM317T which is an adjustable regulator.  Using two resistors and opting out from using a potentiometer to fine-tune the voltage, I attained 2.9V output.  Browsing through my stash of resistors with an ohmmeter, I was able to pick two particular resistors that were further astray from their nominal resistance bringing the voltage to 3.2V.  Close enough!<br><br>
+
+<center><img src="./autonomous/317regulator.jpg" width="704" height="528"></center><br><br>
+
+I will test the Bluetooth connection soon.<br><br>
+
+<hr><br>
+
+<a name="10_20_10">
+10/20/2010<br><br>
+
+Upon testing, the received and transmitted data was scrambled.  It was scrambled the same way every time.  Upon further inspection it was determined that the data was inverted.<br><br>
+
+As it turns out, this little Bluetooth board expects raw TTL serial signals.  The serial signals of the microcontroller are TTL as well, but the board uses an SP232AEN transceiver chip which changes voltage levels and inverts the signal for use with a PC serial COM port.  To bypass this chip, I connected wires directly to the microcontroller chip itself.  The Rx output pin of the SP232AEN was very carefully heated up and lifted with a needle to open its connection.  This modification should be reversible if necessary.<br><br>
+
+I inadvertently lifted the Tx pad on the Bluetooth module and broke the microscopic trace that it connected to!  I attempted to use a razor blade to scrape the green material off of a VIA on the other end of the trace so I could solder a secure connection there.  Unfortunately that didn't work because the VIA is thinner than a 30 AWG wire!  So then I then scraped away to expose the trace and successfully soldered a 30 AWG wire to it.  Super glue was applied because the soldered area is so small.  Testing continuity from the wire to the VIA I scraped earlier, it proved to be continuous.<br><br>
+
+Upon testing again, data sent from the microcontroller was being received properly; it was no longer scrambled.  I could not send data though.  Soon I realized that I must have damaged the VIA when I scraped it!  So I used a needle and forced it into the VIA and wiggled it all around to widen the hole.  Then I took a piece of 30 AWG copper wire and scraped it a bit skinnier.  I dipped the wire in solder, held it up against the widened hole, applied heat again, then added more solder.  Snipping away the rest of the wire, we are left with a tiny piece of wire soldered inside the VIA that you can't even see.  It works!  Data can now be sent both directions through Bluetooth.<br><br>
+
+It is still not possible to send a whole program to the microcontroller.  For some reason something crashes during the file transfer.  I believe it may be the Bluetooth host adapter which definitely needs to be replaced.<br><br>
+
+<hr><br>
+
+<a name="10_21_10">
+10/21/2010<br><br>
+
+Today I tried a MacBook with built-in Bluetooth.  I was able to connect and successfully send a program to the microcontroller using the serial terminal Zterm.  The microcontroller is officially wireless.<br><br>
+
+<hr><br>
+
+<a name="11_08_10">
+11/08/2010<br><br>
+
+The fancy new Bluetooth adapter came today, and it proves to have quite a robust signal.  So I had some fun with our little car.  The data communication is entirely bluetooth.  The car can be completely controlled by a Macintosh or PC laptop with no cords attached, however the car itself is still tethered to a DC supply.  I expanded the program that runs on the microcontroller.  Here is the current serial spec:
+<ul>
+<li>Each character is echoed back to the serial terminal.</li>
+<li>The microcontroller has 1 byte of serial buffer, so you can send up to one additional byte some time before the echo of the previous byte.  (Not recommended.)</li>
+<li>Each command is executed with the return character, i.e. $0D.</li>
+<li>There is a 16-byte command buffer before hitting the enter key.  If it overflows, a '!' character followed by a return character are sent to the serial terminal.  This is arbitrary, though.  Valid commands are either 1 or 3 characters long.</li>
+<li>Commands:</li>
+<ul>
+<li>'l' Turn Left</li>
+<li>'r' Turn Right</li>
+<li>'f' Go Forward</li>
+<li>'b' Go Backward</li>
+<li>'p' Powersave - Turns off all coils in the stepper motor which allows it to turn freely.</li>
+<li>'x' Exit to debugger</li>
+</ul></ul>
+l, r, f, and b accept an argument.  The argument is a number added to lowercase character 'a'.  For example, a = 1, b = 2, c = 3.  "r h&lt;enter&gt" steers 8 units to the right.  Entering one of these four letters without an argument will use a default value which can be changed within the program.  The argument for going forward and backward specifies the length of time the car will move before another command is issued.  I have not measured a time, distance or angle characteristic.  This is a very rudimentary rig designed more for concept and expandability than precision.<br><br>
+
+Future features:
+<ul>
+<li>'f' and 'b' arguments that allow toggling on or off instead of timed runs.</li>
+<li>Some sort of fail-safe to prevent a runaway if the signal is lost with toggling</li>
+<li>Smarter power save, i.e. automatically unlock stepper when not moving.</li>
+<li>Possible 'f' and 'b' arguments that allow speed control via PWM and a feedback loop.</li>
+<li>Proximity sensor reporting via serial.</li>
+<li>Battery Packs.</li>
+<li>A portable power supply.  (Currently using my beloved $3 bench supply)</li>
+<li>Ability to toggle battery packs and power supply / charging system.</li>
+<li>Ability to toggle between Bluetooth TTL serial and RS-232 serial.</li>
+<li>Portability to larger platforms, i.e. a large Power Wheels car.</li></ul><br>
+
+<hr><br>
+
+<a name="11_10_10">
+11/10/2010
+
+More progress today.<br><br>
+
+Power is now supplied by a small 5V/12V transformer made to externally power an internal disc drive.  No batteries yet.  That's it for hardware stuff.<br><br>
+
+On the software side, drive motor toggle functionality has been added.  These are the possible commands:
+<ul>
+<li>T F - Go Forward</li>
+<li>T B - Go Backward</li>
+<li>T C - Coasting Stop</li>
+<li>T S - Braking Stop</li>
+</ul>
+
+With these commands, the drive motor will not stop until issued a stop command.  While driving, steering commands are possible and do not affect the toggle status of the drive motor.  Steering and timed drive commands are currently cycle-burn based instead of properly being timer interrupt based, so the drive motor can NOT be stopped while executing those commands until they complete.  Better programming and fail-safe devices would be necessary in larger applications.<br><br>
+
+"Braking Stop" cleverly utilizes a reverse current protection diode.  To change direction of the drive motor, I elected to use a relay to swap + and - of the motor.  By simultaneously switching off the motor and inverting the relay, the diode creates a short circuit across the terminals of the motor which slows it down faster.  I objectively prefer the coasting stop though, because it produces a nicer sound effect.<br><br>
+
+The previous timed commands have been refined a bit.  The parameter character has changed to be based on capital 'A'.  This is because capital letters come before lowercase letters on the ASCII table, obviously allowing for a much greater range of parameters.  The reason for this convention is because the microcontroller doesn't like some of the invisible characters.  Using normal characters should circumvent those weird problems.<br><br>
+
+Also visited was power savings.  Before, coil #0 in the stepper motor would remain on at all times to hold the steering rigid.  Stepping sequences are designed to always end on this coil.  This coil now turns on when the drive motor turns on and turns off when the drive motor turns off.  The braking, on the other hand, has now added some power usage.  Going forward disengages the relay solenoid, but to brake engages it and leaves it engaged.  Conversely, going backward engages the relay, and to brake disengages it.  The P command was left in the program for this very purpose, to disengage the relay.<br><br>
+
+Error handling is better now.  In addition to overflows, now there are errors for quite a few things, including attempts to brake when not moving, invalid commands, etc.  Each sends an exclamation point back to the terminal.  For commands that take non-trivial amounts of time, a period is sent back to the terminal when the command is complete.<br><br>
+
+All commands are accepted in uppercase or lowercase now.  Parameters are purposely still case-sensitive.  Delete functionality is much better now if mere humans choose to manually punch commands into a serial terminal and make a mistake.  :D  I also made some minor changes to make the code more concise and well-documented.<br><br>
+
+<!-- End Content Area 3 -->
+
+</font></td>
+
+</tr>
+<tr><td height="1"><font size="-5">&nbsp;</font></td></tr> <!-- Pad -->
+</table>
+
+<br><br>
+
+</td>
+<td background="../apple_gui/tab_pane_R.png" width="11"></td></tr>
+<tr><td background="../apple_gui/tab_pane_BL.png" width="11" height="11"></td>
+<td background="../apple_gui/tab_pane_B.png" height="11"></td>
+<td background="../apple_gui/tab_pane_BR.png" width="11" height="11"></td></tr>
+</table>
+
+</font>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+<title>
+Ben Boldt - Nintendo Game Genie Codes
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">Nintendo Game Genie Codes</font></center><br><br><br>
+
+I grew up with the Nintendo Entertainment System.  At the time, games were new and challenging for me, but now I have beaten all of the classics too many times to count.  The novelty in playing them normally is long gone.  But now I can play a new game: take apart the old 8-bit 6502 code and see how it works!<br><br>
+
+I have created these Game Genie codes this way.  Each Game Genie code modifies 1 byte in ROM, however due to paging it can change multiple bytes, each at the same location on different pages.  This is dealt with by incorporating a "compare" or "key" value into the code, making it an 8-letter code, but still you may have the same original byte at the same location on different pages anyway.  So it isn't perfect but usually there it a way to work around it or no noticeable difference when the unintended bytes get changed.  Feel free to use these to supplement your own collection of codes.<br><br>
+
+I created these codes using the <a href="http://www.fceux.com">FCEUX emulator</a>'s built-in debugger and Game Genie encoder.  I also referred extensively to the <a href="http://www.masswerk.at/6502/6502_instruction_set.html">6502 instruction set</a>.  For a freeware web-based Game Genie code converter (&copy;2004 Sam Hocevar), click <a href="./game_genie_codes/javascript_game_genie_encoders-decoders.html">here</a>.  This will let you see the least significant part of the ROM address, existing byte ("Key"), and replacement byte ("Value") for each code.<br><br><br>
+
+<b>Double Dragon</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">ZAKYNTAP</font></td><td>Reveal the complete mission title cut-scene soundtrack by making the scene last 8&times; as long</td></tr>
+</table>
+<br><br>
+
+<b>Final Fantasy</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">ZGXZTZPG</font></td><td>Start game with music track "Opening Theme"</td></tr>
+<tr><td width="128"><font face="courier">LGXZTZPG</font></td><td>Start game with music track "Ending Theme"</td></tr>
+<tr><td width="128"><font face="courier">GGXZTZPG</font></td><td>Start game with music track "World"</td></tr>
+<tr><td width="128"><font face="courier">IGXZTZPG</font></td><td>Start game with music track "Ship"</td></tr>
+<tr><td width="128"><font face="courier">TGXZTZPG</font></td><td>Start game with music track "Airship"</td></tr>
+<tr><td width="128"><font face="courier">YGXZTZPG</font></td><td>Start game with music track "Town"</td></tr>
+<tr><td width="128"><font face="courier">AGXZTZPK</font></td><td>Start game with music track "Coneria Castle"</td></tr>
+<tr><td width="128"><font face="courier">PGXZTZPK</font></td><td>Start game with music track "Gurgu Volcano"</td></tr>
+<tr><td width="128"><font face="courier">ZGXZTZPK</font></td><td>Start game with music track "Matoya's Cave"</td></tr>
+<tr><td width="128"><font face="courier">LGXZTZPK</font></td><td>Start game with music track "Dungeon"</td></tr>
+<tr><td width="128"><font face="courier">GGXZTZPK</font></td><td>Start game with music track "Chaos' Temple"</td></tr>
+<tr><td width="128"><font face="courier">IGXZTZPK</font></td><td>Start game with music track "Floating Castle"</td></tr>
+<tr><td width="128"><font face="courier">TGXZTZPK</font></td><td>Start game with music track "Future Chaos' Temple"</td></tr>
+<tr><td width="128"><font face="courier">YGXZTZPK</font></td><td>Start game with music track "Shop"</td></tr>
+<tr><td width="128"><font face="courier">AIXZTZPG</font></td><td>Start game with music track "Battle"</td></tr>
+<tr><td width="128"><font face="courier">PIXZTZPG</font></td><td>Start game with music track "Menu Screen"</td></tr>
+<tr><td width="128"><font face="courier">ZIXZTZPG</font></td><td>Start game with music track "Death"</td></tr>
+<tr><td width="128"><font face="courier">LIXZTZPG</font></td><td>Start game with music track "Victory"</td></tr>
+<tr><td width="128"><font face="courier">GIXZTZPG</font></td><td>Start game with music track "Got Special Item"</td></tr>
+<tr><td width="128"><font face="courier">IIXZTZPG</font></td><td>Start game with music track "Prelude (Character rearrangement version)"</td></tr>
+<tr><td width="128"><font face="courier">TIXZTZPG</font></td><td>Start game with music track "Save"</td></tr>
+<tr><td width="128"><font face="courier">YIXZTZPG</font></td><td>Start game with music track "Potion"</td></tr>
+<tr><td width="128"><font face="courier">AIXZTZPK</font></td><td>Start game with music track "Treasure Chest"</td></tr>
+</table>
+<br><br>
+
+<b>Final Lap</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">SUULIOVS</font></td><td>Infinite Credits</td></tr>
+</table>
+<br><br>
+
+<b>Game Genie (itself)</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">VVUYAYSZ+<br>SXUYZNOG+<br>ZSUYLYYA+<br>PXUYGYEN+<br>YEUYIYPL+<br>SEUYTYVT</font></td><td>Game Genie cursor wraps from right side of screen back to left side<ul>Notes<hr><li>On a real Nintendo, this requires 3 Game Genies stacked.</li>
+<li>Codes go into effect only for the next Game Genie.</li>
+<li>Cursor will become difficult or impossible to move based on which order you enter the codes.</li>
+<li>Though physically possible, inserting 3 Game Genies without a game cartridge attached will not work because a Game Genie does not have its own lockout chip and therefore relies on the lockout chip in an actual cartridge.</li></td></tr>
+</table>
+<br><br>
+
+<b>Gradius II</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">AASLKUYL</font></td><td>Invincible to enemies (freezes game if you bump into some multi-link enemies)</td></tr>
+<tr><td width="128"><font face="courier">AVSPKIEY</font></td><td>Pass through solid objects (freezes game if you bump into a boss)</td></tr>
+</table>
+<br><br>
+
+<b>Kung Fu</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">ETVGZKSL+<br>VAVGLGEZ+<br>XTVGGGGE</font></td><td>Invincible unless time runs out</td></tr>
+<tr><td width="128"><font face="courier">EYNKIAEI</font></td><td>Knife throwers throw the wrong way</td></tr>
+<tr><td width="128"><font face="courier">VVVEGSSE</font></td><td>Enemy starts with minimum health</td></tr>
+<tr><td width="128"><font face="courier">VXUKPYSZ+<br>VXKKZYSZ</font></td><td>Player has auto-recovering health instead of enemy</td></tr>
+</table>
+<br><br>
+
+<b>Legend of Zelda</b><br>
+(If you are using an emulator, some of these codes require resetting the game after entering the code.)<br>
+(The PRG1 revision of Zelda warns you to hold reset when turning off the Nintendo when you die.  PRG0 does not have this warning.)
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">KTVXXXPZ</font></td><td>Hidden entrances revealed (Does not have issues like code KTVXXZ) [PRG0, PRG1]</td></tr>
+<tr><td width="128"><font face="courier">LANOTXGA</font></td><td>Locked doors still open when you have no keys [PRG0, PRG1]</td></tr>
+<tr><td width="128"><font face="courier">AAONVPAL</font></td><td>Bombs explode immediately [PRG0, PRG1]</td></tr>
+<tr><td width="128"><font face="courier">APONVPAU</font></td><td>Bombs explode in half the time [PRG0, PRG1]</td></tr>
+<tr><td width="128"><font face="courier">ATONVPAL</font></td><td>Bombs take 2&times; as long to explode [PRG0, PRG1]</td></tr>
+<tr><td width="128"><font face="courier">EGONVPAL</font></td><td>Bombs take 4&times; as long to explode [PRG0, PRG1]</td></tr>
+<tr><td width="128"><font face="courier">AAOESATA</font></td><td>Fast Text (Does not glitch game from "Pay me and I'll talk" ladies like code OPPEEA) [PRG0, PRG1]</td></tr>
+<tr><td width="128"><font face="courier">EIVXKGEP</font></td><td>Maximum of 255 Bombs [PRG0, PRG1 untested]</td></tr>
+<tr><td width="128"><font face="courier">SZUPVSSE</font></td><td>Don't lose magic shield from the "Like Like" monster [PRG0, PRG1 untested]</td></tr>
+<tr><td width="128"><font face="courier">PAUPSIAA</font></td><td>The "Like Like" monster gives you a magic shield if you don't have one [PRG0, PRG1 untested]</td></tr>
+<tr><td width="128"><font face="courier">SZVEGGSA</font></td><td>Don't lose sword ability from the white "Bubble" monster (Does not work on the red "Bubble" monster) [PRG0, PRG1 untested]</td></tr>
+</table>
+<br><br>
+
+<b>Mouryou Senki Madara</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">XTVLNSSX+<br>PAVUOITE</font></td><td>Prevent HP from running out during battle for all players. (Using just the first code by itself works pretty well, but if a character's HP is a multiple of 256, the character could still die.)</td></tr>
+<tr><td width="128"><font face="courier">SZKOZVVV</font></td><td>No random encounters</td></tr>
+</table>
+<br><br>
+
+<b>Pac-Man (Namco)</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">ZAVIIGPA+<br>ZAUIIGPA</font></td><td>Pac-Man moves twice as fast</td></tr>
+<tr><td width="128"><font face="courier">TUKIYXTX</font></td><td>Pac-Man walks through ghosts instead of dying</td></tr>
+<tr><td width="128"><font face="courier">AEKIYXTZ</font></td><td>Pac-Man can always eat the ghosts no matter what form they are in</td></tr>
+</table>
+<br><br>
+
+<b>Seicross</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">PEGEUG</font></td><td>All levels scroll at slow speed</td></tr>
+<tr><td width="128"><font face="courier">GEGEUG</font></td><td>All levels scroll at fast speed</td></tr>
+<tr><td width="128"><font face="courier">AEGEUG</font></td><td>All levels scroll at ultra fast speed</td></tr>
+<tr><td width="128"><font face="courier">LANALAAA+<br>IANAIANL</font></td><td>Always have big rapid fire</td></tr>
+<tr><td width="128"><font face="courier">NYNALAAE+<br>IANAIANL</font></td><td>Always have big rapid fire, extra fast</td></tr>
+<tr><td width="128"><font face="courier">OXXOEZSX</font></td><td>Fill energy instead of die when energy runs out</td></tr>
+<tr><td width="128"><font face="courier">APNPIKPZ+<br>GANPTGEA+<br>VTNPYGEY+<br>GYNOAGZE</font></td><td>Character moves forward 2&times; as fast</td></tr>
+<tr><td width="128"><font face="courier">TANOAGZA+<br>VTNOLGSZ+<br>GYNOGGIV+<br>VTNOIGEI+<br>GYNOTKTE+<br>IEEPPGEI+<br>IVEPZKZA+<br>IEEPLGSZ</font></td><td>Character moves forward 3&times; as fast</td></tr>
+</table>
+<br><br>
+
+<b>Shanghai II</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">APKSPOAU</font></td><td>Able to select and play any tile</td></tr>
+<tr><td width="128"><font face="courier">TAUSGOGE</font></td><td>Able to select and play any tile that is not covered at all by another tile</td></tr>
+<tr><td width="128"><font face="courier">IKEKYAGZ</font></td><td>Game starts immediately with solitaire ending sequence</td></tr>
+<tr><td width="128"><font face="courier">GAXKPAAA</font></td><td>Game starts immediately with scrolling credits (may not normally be possible to see this)</td></tr>
+<tr><td width="128"><font face="courier">AEUGTEXY</font></td><td>Speed up copyright screen when game first starts</td></tr>
+</table>
+<br><br>
+
+<b>Super Mario Bros.</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">PXNLOYIV</font></td><td>Player and enemies wrap around the screen instead of die when falling down holes.<ul>Notes<hr><li>If player jumps beyond the top of the screen, it also wraps to the bottom, so you can bump your head on the bottom of the screen when jumping for flagpoles</li>
+<li>You can become stranded at the end of any level that has bricks across the top of the screen</li>
+<li>Game becomes stuck if you run out of time</li></td></tr>
+<tr><td width="128"><font face="courier">AASIYNLT</font></td><td>Buzzy Beetle can be defeated via fireball</td></tr>
+<tr><td width="128"><font face="courier">XZOSYYVZ</font></td><td>Fireballs do not terminate upon defeating an enemy.  Side effect: Bowser is defeated with 1 fireball.  This code could be called "stronger fireballs".</td></tr>
+<tr><td width="128"><font face="courier">XNNATXKN</font></td><td>Start game as second quest</td></tr>
+<tr><td width="128"><font face="courier">TXEEVGGS</font></td><td>Based on code PEAEKG: Question blocks containing coins have a small coin symbol</td></tr>
+<tr><td width="128"><font face="courier">NOOAXGGS</font></td><td>Question blocks containing power-ups have a small crown symbol</td></tr>
+<tr><td width="128"><font face="courier">PGEEXGIG</font></td><td>Overworld bricks containing starman have a small star symbol</td></tr>
+<tr><td width="128"><font face="courier">TZEEVGIK</font></td><td>Overworld bricks containing multi-coins have a small coin symbol</td></tr>
+<tr><td width="128"><font face="courier">NPEAXGIK</font></td><td>Overworld bricks containing power-ups have a small crown symbol</td></tr>
+<tr><td width="128"><font face="courier">YLEAVGIK</font></td><td>Overworld bricks containing beanstalks have a small beanstalk symbol</td></tr>
+</table>
+<br><br>
+
+<b>Super Mario Bros. 3</b>
+<table border="1" width="100%">
+<tr><td width="128"><font face="courier">PTKXYZES</font></td><td>Always able to shoot fireballs regardless of suit, except hammer suit still throws hammers</td></tr>
+<tr><td width="128"><font face="courier">AEVZPZPA+<br>AAKZPKLI</font></td><td>If player can shoot fireballs, player throws hammers instead</td></tr>
+<tr><td width="128"><font face="courier">OXVZUKPX</font></td><td>Always have ability to fly regardless of suit</td></tr>
+<tr><td width="128"><font face="courier">AXOXELSZ+<br>VXOXOUSV+<br>NXOXXUZE<font color="AAAAAA">+<br>OXOXUUZE+<br>AXOXKUZE</font></font></td><td>Always have Tanooki statue ability regardless of suit<br>
+<ul>Notes<hr><li>Glitched statue graphics</li>
+<li>Last 2 codes are optional, there may be a bug without them but I have not found it</li>
+<li>Player can jump a little bit while in statue state</li></ul></td></tr>
+<tr><td width="128"><font face="courier">NNVZPLEK</font></td><td>Tanooki statue state lasts 33% longer</td></tr>
+<tr><td width="128"><font face="courier">SXNZSNVK</font></td><td>Tanooki statue state never times out</td></tr>
+<tr><td width="128"><font face="courier">NYKSUZIE</font></td><td>Keep Kuribo's boot after damage</td></tr>
+<tr><td width="128"><font face="courier">AEVGTLZA</font></td><td>Hammer suit can slide down hills</td></tr>
+<tr><td width="128"><font face="courier">AEVGGLZA</font></td><td>Frog suit can slide down hills</td></tr>
+
+<tr><td width="128"><font face="courier">PEOXNAZA</font></td><td>Mushroom makes you small</td></tr>
+<tr><td width="128"><font face="courier">LEOXNAZA</font></td><td>Mushroom gives you fire suit</td></tr>
+<tr><td width="128"><font face="courier">GEOXNAZA</font></td><td>Mushroom gives you raccoon suit</td></tr>
+<tr><td width="128"><font face="courier">IEOXNAZA</font></td><td>Mushroom gives you frog suit</td></tr>
+<tr><td width="128"><font face="courier">TEOXNAZA</font></td><td>Mushroom gives you Tanooki suit</td></tr>
+<tr><td width="128"><font face="courier">YEOXNAZA</font></td><td>Mushroom gives you hammer suit</td></tr>
+<tr><td width="128"><font face="courier">EEOXNAZA</font></td><td>Mushroom gives you Kuribo's boot (glitched boot graphics)</td></tr>
+
+<tr><td width="128"><font face="courier">PAKXVGGA</font></td><td>Leaf makes you small</td></tr>
+<tr><td width="128"><font face="courier">ZAKXVGGA</font></td><td>Leaf makes you big</td></tr>
+<tr><td width="128"><font face="courier">LAKXVGGA</font></td><td>Leaf gives you fire suit</td></tr>
+<tr><td width="128"><font face="courier">IAKXVGGA</font></td><td>Leaf gives you frog suit</td></tr>
+<tr><td width="128"><font face="courier">TAKXVGGA</font></td><td>Leaf gives you Tanooki suit</td></tr>
+<tr><td width="128"><font face="courier">YAKXVGGA</font></td><td>Leaf gives you hammer suit</td></tr>
+<tr><td width="128"><font face="courier">EAKXVGGA</font></td><td>Leaf gives you Kuribo's boot (glitched boot graphics)</td></tr>
+
+<tr><td width="128"><font face="courier">PAEXNZLA</font></td><td>Flower makes you small</td></tr>
+<tr><td width="128"><font face="courier">ZAEXNZLA</font></td><td>Flower makes you big</td></tr>
+<tr><td width="128"><font face="courier">GAEXNZLA</font></td><td>Flower gives you raccoon suit</td></tr>
+<tr><td width="128"><font face="courier">IAEXNZLA</font></td><td>Flower gives you frog suit</td></tr>
+<tr><td width="128"><font face="courier">TAEXNZLA</font></td><td>Flower gives you Tanooki suit</td></tr>
+<tr><td width="128"><font face="courier">YAEXNZLA</font></td><td>Flower gives you hammer suit</td></tr>
+<tr><td width="128"><font face="courier">EAEXNZLA</font></td><td>Flower gives you Kuribo's boot (glitched boot graphics)</td></tr>
+
+<tr><td width="128"><font face="courier">IXVGNVVK</font></td><td>Starman invincibility does not wear off until the stage ends</td></tr>
+<tr><td width="128"><font face="courier">KZVZLNVK</font></td><td>White Block "behind the scenes" effect does not wear off until the stage ends</td></tr>
+<tr><td colspan="2">
+<table width="100%" border="1">
+<tr><td width="128"><font face="courier">EAOZUALI+<br>IYOZKAIE+<br><font color="AAAAAA">_AOZOAE_</font></font></td>
+<td>Starman changes Mario's first inventory item instead of giving you invincibility</td>
+<td rowspan="2"><font face="courier">PAOZOAET</font> = Mushroom<br>
+<font face="courier">ZAOZOAET</font> = Flower<br>
+<font face="courier">LAOZOAET</font> = Leaf<br>
+<font face="courier">GAOZOAET</font> = Frog Suit<br>
+<font face="courier">IAOZOAET</font> = Tanooki Suit<br>
+<font face="courier">TAOZOAET</font> = Hammer Suit<br>
+<font face="courier">YAOZOAET</font> = Cloud<br>
+<font face="courier">AAOZOAEV</font> = P-Wing<br>
+<font face="courier">PAOZOAEV</font> = Starman<br>
+<font face="courier">ZAOZOAEV</font> = Anchor<br>
+<font face="courier">LAOZOAEV</font> = Hammer<br>
+<font face="courier">GAOZOAEV</font> = Whistle<br>
+<font face="courier">IAOZOAEV</font> = Music Box
+</td>
+</tr>
+<tr><td width="128"><font face="courier">UZOZUALI+<br>IYOZKAIE+<br><font color="AAAAAA">_AOZOAE_</font></font></td>
+<td>Starman changes Luigi's first inventory item instead of giving you invincibility</td>
+</tr>
+</table>
+</td></tr>
+
+<tr><td width="128"><font face="courier">UZOZVAEU+<br>ELOZNEEX</font></td><td>Starman squishes into a shell and can be picked up like a turtle.  If it comes out of its shell while you're holding it, it disappears and gives you frog suit.  If you kick it, it bounces and can hurt you like a turtle shell.</td></tr>
+<tr><td width="128"><font face="courier">AZOZEEOZ+<br>EPOZOAET+<br>NLOZXESE</font></td><td>Starman causes instant saving of the princess.</td></tr>
+<tr><td width="128"><font face="courier">AZOZSEGG+<br>XAOZVAEU+<br>NLOZNEEX</font></td><td>Starman causes instant saving of the princess only if you are holding "up" when you get it, otherwise it gives you invincibility and hammer suit.</td></tr>
+<tr><td width="128"><font face="courier">AEVAXNPP</font></td><td>Beating any level causes instant saving of the princess</td></tr>
+<tr><td width="128"><font face="courier">EIXKXTEY</font></td><td>Always have cloud ability on map (i.e. skip stages), unless you use an actual cloud item</td></tr>
+<tr><td width="128"><font face="courier">PEUXGAAZ</font></td><td>Donut blocks <i>immediately</i> break free</td></tr>
+<tr><td width="128"><font face="courier">AOUXGAAZ</font></td><td>Donut blocks break free in half the time</td></tr>
+<tr><td width="128"><font face="courier">AKUXGAAZ</font></td><td>Donut blocks take 2&times; as long to break free</td></tr>
+<tr><td width="128"><font face="courier">EEUXGAAZ</font></td><td>Donut blocks take 4&times; as long to break free</td></tr>
+<tr><td width="128"><font face="courier">AEUXGAAZ</font></td><td>Donut blocks take 8&times; as long to break free</td></tr>
+<tr><td width="128"><font face="courier">SLSZZTVI</font></td><td>Donut blocks <i>never</i> break free</td></tr>
+<tr><td width="128"><font face="courier">POUZPTGE</font></td><td>Thwomp falls with 7.75&times; acceleration</td></tr>
+<tr><td width="128"><font face="courier">AOUZPTGA</font></td><td>Thwomp falls with 4&times; acceleration</td></tr>
+<tr><td width="128"><font face="courier">AEUZPTGE</font></td><td>Thwomp falls with 2&times; acceleration</td></tr>
+<tr><td width="128"><font face="courier">ZEUZPTGA</font></td><td>Thwomp falls with a half of the acceleration</td></tr>
+<tr><td width="128"><font face="courier">PEUZPTGA</font></td><td>Thwomp falls with a quarter of the acceleration</td></tr>
+<tr><td width="128"><font face="courier">AEUZPTGA</font></td><td>Thwomp <i>never</i> falls</td></tr>
+<tr><td width="128"><font face="courier">ENVZTTEN</font></td><td>Thwomp takes 2&times; as long to rise back up</td></tr>
+<tr><td width="128"><font face="courier">KNVZTTEN</font></td><td>Thwomp takes 4&times; as long to rise back up</td></tr>
+<tr><td width="128"><font face="courier">VNVZTTEN</font></td><td>Thwomp takes 8&times; as long to rise back up</td></tr>
+<tr><td width="128"><font face="courier">NNVZTTEN</font></td><td>Thwomp takes 16&times; as long to rise back up</td></tr>
+<tr><td width="128"><font face="courier">AEVZTTEY</font></td><td>Thwomp <i>never</i> rises back up</td></tr>
+
+</table>
+<br><br>
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

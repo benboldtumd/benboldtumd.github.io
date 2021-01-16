@@ -1,0 +1,140 @@
+<html>
+<head>
+<title>
+Ben Boldt - Flashable Nintendo Cartridges
+</title>
+<base href="../"/>
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">Flashable Nintendo Cartridges</font><br><br>
+<br>
+</center>
+
+Nintendo games can be emulated very accurately on your computer, but the feeling of playing a real Nintendo on a real CRT television with a real Nintendo controller just absolutely cannot be reproduced on your computer.  The nostalgia of cleaning and wiggling the cartridge until it starts working is an important detail to many of us.<br><br>
+
+You can easily find most games on eBay in the range of $5-20 each, but I wanted to take a more hands-on approach, for the curiosity and challenge, and also because I have a bag of 8-bit, 512kbyte parallel flash ROMs that I have been itching to use.  So, I bought a few "lame" Nintendo games on eBay that already contained some of the chips I needed.  My plan was to remove the ROM chips from these games and replace them with Flash chips.  This way, I could flash different games to the cartridges.  The idea was to take ROM dumps from the computer and run them on real hardware.<br><br>
+
+<center><img src="./nes_carts/4in1_1.jpg"><br>First Donor Cart</center><br><br>
+
+I found Bases Loaded at a thrift store for several dollars.  This game contains the MMC1 memory mapper, the CIC lockout chip, and 2 mask ROMs containing the Bases Loaded game.  One ROM is for the CPU ("PRG ROM") and the other ROM is for the GPU ("CHR ROM").<br><br>
+
+I desoldered the ROMs and replaced them with custom breadboards allowing for sockets for my PLCC-32 flash ROMs.<br><br>
+
+<center><img src="./nes_carts/4in1_2.jpg"><br>Front Side</center><br><br>
+
+Here the 2 most significant address bits are tied to ground for testing purposes.  The games that I intended to put into this cartridge used up to twice as much CHR ROM as the original Bases Loaded, so I needed to pull an additional address line directly from the mapper chip, as you can see A16.<br><br>
+
+<center><img src="./nes_carts/4in1_3.jpg"><br>Back Side</center><br><br>
+
+Once this was working with one game, I proceeded to add switches to the most significant address bits of both ROMs.  This would allow me to put 4 games on the ROMs and select between them with the switches.  I put the switches at a location where they would not cause much obstruction when inserting the cartridge into the Nintendo.<br><br>
+
+<center><img src="./nes_carts/4in1_4.jpg"><br>Inside</center><br><br>
+
+<center><img src="./nes_carts/4in1_5.jpg"><br>Outside</center><br><br>
+
+And that was it!  The game was done, all it needed was a label.  It contains Double Dragon, Teenage Mutant Ninja Turtles, Tetris, and Xenophobe.<br><br>
+
+Next, I had a cartridge that I bought on eBay called "Silent Service".  It was a Mapper #2 game ("UN-ROM").  I intended to use a DIP switch to select between a lot of mapperless games in this cartridge, so this is why I removed all of its mapper hardware.  In this case, the mapper was two 7400 series chips.  I also took out the CHR-RAM chip that it had and saved it for later use.<br><br>
+
+This one had to have some of my own logic gates added.  In my first cartridge, the MMC1 chip controls the video mirroring selection between horizontal and vertical mirroring.  Without mapper control, you have to manually select this by connecting pins together.  Because I wanted to make this selection with 1 SPST switch in the dip switch, I chose to do that with logic gates:<br><br>
+
+Output = (/SW5&bull;NES_H)+(SW5&bull;NES_V)<br><br>
+
+This way I could use just switch 5 with a pull-up to control mirroring.  Switches 0 - 4 would then control the most significant address lines of the ROM chips.<br><br>
+
+Most of the games that I wanted to put on this cartridge had 16kbytes of PRG ROM and 8kbytes of CHR ROM, but 7 of them had 32kbytes of PRG and 8kbytes of CHR.  To accommodate this, use an OR gate on my least significant address switch.  When the switch was off (logic 0), it allowed the NES to control that address line, and when the switch was on (logic 1), it forced that address line to 1.<br><br>
+
+I put it all together and glued in a DIP switch only to find out that the DIP switch was bad!  Serves me right for not testing after scavenging it from some old circuit board.  I was able to crack it back out of there without too much trouble.<br><br>
+
+<center><img src="./nes_carts/25in1_1.jpg"><br>Front</center><br><br>
+
+<center><img src="./nes_carts/25in1_2.jpg"><br>Back</center><br><br>
+
+It still didn't work with a good DIP switch!  The NES's addressing puts its internal RAM at address 0x0000, so PRG-ROM starts at 0xFFFF minus the size of the ROM.  It has a vector table, including a reset vector, at the very end of ROM.  So, as strange as it seems, I needed AND logic instead of OR logic.  I made this change, so now my least significant switch allows the NES to control the address line if the switch is 1, and it forces the address line to 0 if the switch is 0.<br><br>
+
+After figuring this out, the cartridge works and it ended up containing 25 games, completely filling the 512kbyte PRG-ROM.<br><br>
+
+<center><img src="./nes_carts/25in1_3.jpg"><br>25-in-1 Label</center><br><br>
+
+Well what next?  I had not yet done an MMC3 cartridge and I had purchased a lame game just for that purpose, "Codename Viper".  MMC3 allows for some newer and much bigger and more complicated games.  I was most interested in Kirby's Adventure and Super Mario Bros. 2 and 3.  There are also quite a few good modifications out there where people have redone all of the levels in these games, so I wanted to run a few of those too.  That means that this cartridge would need to have more capacity than the others.  I had mapped out that I needed 2 CHR ROMs (1 Mbyte) and 3 PRG ROMs (1.5 Mbyte). Also, I would need an 8kbyte W-RAM chip.  This is where the CHR-RAM chip from Silent Service comes back into play.<br><br>
+
+First I had to lay out approximately how I was going to fit these things into the cartridge.<br><br>
+
+<center><img src="./nes_carts/6in1_1.jpg"><br>Layout</center><br><br>
+
+Next, I had to wire all of these things together!  That was easier said than done.  This was definitely a challenge.<br><br>
+
+<center><img src="./nes_carts/6in1_2.jpg"><br>Wiring</center><br><br>
+
+Initially the wiring was too thick on these boards to fit inside the cartridge, so I very carefully put each of these boards into a manual press and gradually squished them just enough to fit inside the cartridge.  I was amazed and relieved to find no problems when I tested each pin for opens and shorts!<br><br>
+
+When finished with the backs of the boards, I proceeded to the front, where I connected to the original Codename Viper board.<br><br>
+
+<center><img src="./nes_carts/6in1_3.jpg"><br>PRG-ROM and W-RAM Finished</center><br><br>
+
+<center><img src="./nes_carts/6in1_4.jpg"><br>CHR-ROM and Switces Finished</center><br><br>
+
+<center><img src="./nes_carts/6in1_5.jpg"><br>Back Side, showing direct MMC3 connections for the W-RAM</center><br><br>
+
+<center><img src="./nes_carts/6in1_6.jpg"><br></center><br><br>
+
+<center><img src="./nes_carts/6in1_7.jpg"><br></center><br><br>
+
+<br><br><hr><br>
+
+Next up: 2-in-1 Featuring Strider and Rad Racer!  This is based on the MMC1 mapper with CHR-RAM.  The donor cart was "Win, Lose or Draw," which is an incredibly lame game that already had the MMC1 mapper chip and a CHR-RAM chip.  This one was very easy because I only had to attach one flash chip for PRG-ROM.<br><br>
+
+<center><img src="./nes_carts/2in1_1.jpg"><br>Front side</center><br><br>
+
+<center><img src="./nes_carts/2in1_2.jpg"><br>Back side</center><br><br>
+
+<center><img src="./nes_carts/2in1_3.jpg"><br>Showing all 4 carts made so far</center><br><br>
+
+<center><img src="./nes_carts/2in1_4.jpg"><br>The switch turned out great on the 2-in-1!</center><br><br>
+
+<br><br><hr><br>
+
+Next I made an 8-in-1.  This cart is a UNROM (iNES Mapper 2) with CHR-RAM.  I sacrificed "Jack Nicklaus' 18 Holes of Major Championship Golf," which won't be missed.  Like the 2-in-1 cart, this one also has CHR-RAM so I only needed to attach flash chips for the PRG-ROM.  4 of this type of game will fit into a single flash chip and there were more than 4 that I wanted.  So I put 2 flash chips in parallel on this one. (Total 1 MByte)<br><br>
+
+Here is the list of games that I put on this cart:
+<ul><li>Alfred Chicken</li>
+<li>Castlevania</li>
+<li>Contra</li>
+<li>Hello Kitty World</li>
+<li>Megaman</li>
+<li>Shanghai II</li>
+<li>Top Gun</li>
+<li>Zanac</li></ul><br><br>
+
+<center><img src="./nes_carts/8in1_1.jpg"><br>Wires soldered to the first flash chip</center><br><br>
+
+<center><img src="./nes_carts/8in1_2.jpg"><br>Wires soldered to the second flash chip</center><br><br>
+
+<center><img src="./nes_carts/8in1_3.jpg"><br>Wires soldered to the pin header</center><br><br>
+
+<center><img src="./nes_carts/8in1_4.jpg"><br>Front side</center><br><br>
+
+<center><img src="./nes_carts/8in1_5.jpg"><br>Back side, purple wires to mirroring pads</center><br><br>
+
+<center><img src="./nes_carts/8in1_6.jpg"><br>Running Shanghai II</center><br><br>
+
+<center><img src="./nes_carts/8in1_7.jpg"><br>Having solved a game of Mahjong solitaire in Shanghai II</center><br><br>
+
+<center><img src="./nes_carts/8in1_8.jpg"><br>Running Hello Kitty World</center><br><br>
+
+<center><img src="./nes_carts/8in1_9.jpg"><br>Logic for automatic mirroring selection (eliminates 4th switch)</center><br><br>
+
+<center><img src="./nes_carts/8in1_10.jpg"><br>8-in-1 label</center><br><br>
+
+
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

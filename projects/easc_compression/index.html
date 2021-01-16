@@ -1,0 +1,158 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+<title>
+Ben Boldt - Secret Enhanced Apple Sound Chip Decompression Mode
+</title>
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; color: #683821}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; color: #760f50}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; min-height: 14.0px}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; color: #236e25}
+    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; color: #891315}
+    p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco}
+    span.s1 {color: #000000}
+    span.s2 {color: #891315}
+    span.s3 {color: #760f50}
+    span.s4 {color: #0000ff}
+    span.s5 {color: #236e25}
+    span.Apple-tab-span {white-space:pre}
+  </style>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">Secret Enhanced Apple Sound Chip Decompression Mode</font></center><br><br><br>
+
+After some conversations at 68kmla.org, I decided to whip out a dump of my Quadra 700's ROM and extract its secret, alternate startup sound.  Back in the day, Apple hid all sorts of easter eggs like this in their Macs.  Those days are long gone.<br><br>
+
+I just opened the ROM file as raw audio and played it.  I adjusted the sample rate, bits per sample, and signed/unsigned settings, and eventually I found the sound but it was very poor quality.  I narrowed it down to an approximate range of bytes and dougg3, a user on the 68kmla forum, pointed out a sound header that he recognized in that area.  We then were able to extract the exact range of bytes that comprised the sound.<br><br>
+
+The sound data was odd because it didn't play exactly in tune and each 15th byte was different.  These special bytes seemed to follow a pattern.  Sure enough, when we stripped these bytes, the sound quality improved and played in tune, but it was still terrible quality.  dougg3 also pointed out that an unknown compression type was specified in the header.  UH-OH.  This compression is only used by startup sounds as far as we're aware.  Attempting to play a sound with this compression from within the Mac OS is met with an invalid compression error message.  Pre-OS X versions of Mac OS have a built-in OS-level sound player for system beeps and other packaged sound files.<br><br>
+
+The sound was very high-passed when played in this raw fashion, and I hypothesized that this could indicate that the data was stored in some sort of differential mode, which is common for compression.  We tried several things, some improvements were made, we knew that the sound was stored in 15-byte packets, but still the sound was completely garbled.<br><br>
+
+After a little research, I realized that somebody made a control panel for this, so that you can listen to and even enable the secret startup sound.  I opened this control panel up in an editor, and within its tiny amount of code, I realized a point at which I could sneak in some additional packets.  So I did this - I hard-coded in an extra packet by directly adding 68k instructions.  The control panel then played all of the compressed sound packets from ROM, plus one extra packet that I could modify.<br><br>
+
+It was at this point that we discovered that each packet specifies a response behavior:<br><br>
+
+<center>
+<img src="./easc_compression/wave-type-1.gif"><br>
+Response Type 1: Relative Decay<br><br><br>
+
+<img src="./easc_compression/wave-type-2.gif"><br>
+Response Type 2: Relative Overshoot<br>
+The step for this response was smaller than the others.<br>
+I believe that the response peaked.  (Not a good image.)<br><br><br>
+
+<img src="./easc_compression/wave-type-3.gif"><br>
+Response Type 3: Relative Oscillate<br><br><br>
+
+<a href="./easc_compression/step_response.png"><img src="./easc_compression/step_response.png" height="215" width="415" border="0"></a><br>
+All responses calculated and graphed in Excel<br><br><br>
+</center>
+
+Each nibble of the remaining 14 bytes in the packet characterizes an input value that tweaks the waveform and allows it to respond in the fashion designated by the current wave type.  Silly things happen when you change wave types, etc, but have a look at <a href="http://68kmla.org/forums/viewtopic.php?f=29&t=18656">this thread</a> on the 68kmla forum if you'd like to see the details.  I am user "Dennis Nedry".  We're able to decompress this sound compression almost perfectly now.<br><br>
+
+C++ Decompression Code:<br><br>
+
+<center><table border="1" bgcolor="#FFFFFF" cellspacing=0 cellpadding=10><tr><td>
+<p class="p1">#include &lt;stdio.h&gt;</p>
+<p class="p1">#include &lt;stdint.h&gt;</p>
+<p class="p1">#include &lt;iostream&gt;</p>
+<p class="p2">using<span class="s1"> </span>namespace<span class="s1"> std;</span></p>
+<p class="p3"><br></p>
+<p class="p4">// Global variable definitions</p>
+<p class="p5"><span class="s1">FILE *f = fopen(</span>"Q700RawSoundData2"<span class="s1">, </span>"rb"<span class="s1">);</span></p>
+<p class="p6">FILE *w = fopen(<span class="s2">"Q700DataOut"</span>, <span class="s2">"wb"</span>);</p>
+<p class="p3"><br></p>
+<p class="p6">int16_t envelope;</p>
+<p class="p6">int16_t delta;</p>
+<p class="p3"><br></p>
+<p class="p4">// Prototypes</p>
+<p class="p6"><span class="s3">void</span> speak(int8_t type, int16_t raster);</p>
+<p class="p3"><br></p>
+<p class="p6"><span class="s3">int</span> main(<span class="s3">int</span> argc, <span class="s3">char</span> *argv[])</p>
+<p class="p6">{</p>
+<p class="p6"><span class="Apple-tab-span">	</span>int8_t packet[<span class="s4">15</span>];</p>
+<p class="p6"><span class="Apple-tab-span">	</span>int8_t nibble_1, nibble_2;</p>
+<p class="p6"><span class="Apple-tab-span">	</span>int16_t raster_1, raster_2;</p>
+<p class="p3"><br></p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span></span>// Init variables<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p6"><span class="Apple-tab-span">	</span>envelope = <span class="s4">0</span>;</p>
+<p class="p6"><span class="Apple-tab-span">	</span>delta = <span class="s4">0</span>;</p>
+<p class="p3"><span class="Apple-tab-span">	</span></p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span></span><span class="s3">while</span><span class="s1"> (fread(packet, </span><span class="s4">1</span><span class="s1">, </span><span class="s4">15</span><span class="s1">, f)) </span>// Read in entire packets until EOF.</p>
+<p class="p6"><span class="Apple-tab-span">	</span>{<span class="Apple-tab-span">	</span></p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s3">for</span><span class="s1">(</span><span class="s3">int</span><span class="s1"> i = </span><span class="s4">1</span><span class="s1">; i &lt; </span><span class="s4">15</span><span class="s1">; i++)<span class="Apple-converted-space">  </span></span>// for each packet data byte</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>{</p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// Separate and sign extend each nibble.</p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>nibble_1 = packet[i] &amp; </span><span class="s4">0x0F</span><span class="s1">;<span class="Apple-converted-space">  </span></span>// Least significant nibble plays first.</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>nibble_2 = (packet[i] &amp; <span class="s4">0xF0</span>) &gt;&gt; <span class="s4">4</span>;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s3">if</span>(nibble_1 &amp; <span class="s4">0x08</span>) nibble_1 |= <span class="s4">0xF0</span>;<span class="Apple-converted-space">  </span><span class="s5">// Sign extend</span></p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s3">if</span>(nibble_2 &amp; <span class="s4">0x08</span>) nibble_2 |= <span class="s4">0xF0</span>;</p>
+<p class="p3"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// Determine decompressed values based on data nibbles and header nibble</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>raster_1 = (nibble_1 * <span class="s4">4096</span>) / (<span class="s4">1</span> &lt;&lt; (packet[<span class="s4">0</span>] &amp; <span class="s4">0x0F</span>));</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>raster_2 = (nibble_2 * <span class="s4">4096</span>) / (<span class="s4">1</span> &lt;&lt; (packet[<span class="s4">0</span>] &amp; <span class="s4">0x0F</span>));</p>
+<p class="p3"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>speak(packet[<span class="s4">0</span>] &amp; <span class="s4">0x30</span>, raster_1);</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>speak(packet[<span class="s4">0</span>] &amp; <span class="s4">0x30</span>, raster_2);</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}</p>
+<p class="p6"><span class="Apple-tab-span">	</span>}</p>
+<p class="p3"><br></p>
+<p class="p6"><span class="Apple-tab-span">	</span>fclose(f);</p>
+<p class="p6"><span class="Apple-tab-span">	</span>fclose(w);</p>
+<p class="p6">}</p>
+<p class="p3"><br></p>
+<p class="p6"><span class="s3">void</span> speak(int8_t type, int16_t raster)</p>
+<p class="p6">{<span class="Apple-tab-span">	</span></p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s3">switch</span>(type)</p>
+<p class="p6"><span class="Apple-tab-span">	</span>{</p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s3">case</span><span class="s1"> </span><span class="s4">0x00</span><span class="s1">:<span class="Apple-converted-space">  </span></span>// Direct Sample</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envelope = raster;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>fwrite(&amp;envelope, <span class="s4">2</span>, <span class="s4">1</span>, w);</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>delta = <span class="s4">0</span>;</p>
+<p class="p2"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>break<span class="s1">;</span></p>
+<p class="p3"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s3">case</span><span class="s1"> </span><span class="s4">0x10</span><span class="s1">:<span class="Apple-converted-space">  </span></span>// Relative Decay</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>delta = -(raster);</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envelope -= delta;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>fwrite(&amp;envelope, <span class="s4">2</span>, <span class="s4">1</span>, w);</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envelope -= envelope / <span class="s4">16</span>;</p>
+<p class="p2"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>break<span class="s1">;</span></p>
+<p class="p3"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s3">case</span><span class="s1"> </span><span class="s4">0x20</span><span class="s1">:<span class="Apple-converted-space">  </span></span>// Relative Overshoot</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>delta -= raster;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envelope -= delta;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>fwrite(&amp;envelope, <span class="s4">2</span>, <span class="s4">1</span>, w);</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>delta -= delta / <span class="s4">8</span>;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envelope -= envelope / <span class="s4">8</span>;</p>
+<p class="p2"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>break<span class="s1">;</span></p>
+<p class="p3"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p4"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s3">case</span><span class="s1"> </span><span class="s4">0x30</span><span class="s1">:<span class="Apple-converted-space">  </span></span>// Relative Oscillate</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>delta -= raster;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>delta += (envelope * <span class="s4">3</span>) / <span class="s4">8</span>;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envelope = (envelope - delta) - (envelope - delta) / <span class="s4">8</span>;</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>fwrite(&amp;envelope, <span class="s4">2</span>, <span class="s4">1</span>, w);</p>
+<p class="p2"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>break<span class="s1">;</span></p>
+<p class="p3"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p2"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>default<span class="s1">:</span></p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>cerr &lt;&lt; </span>"Error when parsing sound characteristic nibble.\n"<span class="s1">;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>break<span class="s1">;</span></p>
+<p class="p6"><span class="Apple-tab-span">	</span>}</p>
+<p class="p6">}</p>
+</td></tr></table></center><br><br>
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>
+Ben Boldt - 2-Phase Stepper Motor Driver
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<img src="../../spacer.gif" width="1" height="1325">
+<div style="position:absolute;top:157;left:0;width:100%;">
+
+<center>
+<table border="0" width="80%" cellspacing="0" cellpadding="0"><tr><td>
+<center><font size="+3">2-Phase Stepper Motor Driver</font></center><br><br>
+
+I have lots of motors, and lots of stepper motors.  Most are the more simple 6-wire variety, that require you to step the wires in a simple sequence.  But I have this strange little stepper motor that only has 3 wires.  One wire is common, and the other two are alternating inputs.  The current must switch direction as part of the sequence.  With respect to common, the sequence is as follows:</td></tr></table><br><br>
+
+<table border="1" bgcolor="#FFFFFF">
+<tr><td><b>Step</b></td><td><b>Input 1</b></td><td><b>Input 2</b></td></tr>
+<tr><td>1</td><td>+24 Volts</td><td>0 Volts</td></tr>
+<tr><td>2</td><td>0 Volts</td><td>+24 Volts</td></tr>
+<tr><td>3</td><td>-24 Volts</td><td>0 Volts</td></tr>
+<tr><td>4</td><td>0 Volts</td><td>-24 Volts</td></tr>
+</table><br><br>
+
+<div style="position:relative;top:0;left:0;width:80%;overflow:scroll;">
+
+<img src="./stepper/stepper_schematic.gif">
+</div>
+</center>
+</div>
+
+<br><img src="./stepper/digital_logic.png"><br><br>&nbsp;
+
+</center>
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

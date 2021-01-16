@@ -1,0 +1,114 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+<title>
+Ben Boldt - Musical Furniture
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3"> Musical Furniture </font></center><br><br><br>
+
+Musical Furniture is a featured exhibit in Sensor Zone at The Works in Bloomington, MN.  I created this page and added to it as I was in the process of developing the exhibit.<br><br><hr><br><br>
+
+Musical Furniture is a prototype exhibit that I am working on for The Works.  The idea is to add sensors to furniture and for it to trigger and affect music as visitors sit down.  I am working on the sensing and audio parts of this exhibit.  Currently, I have a microcontroller running as a MIDI device, and I am able to issue MIDI commands based on digital button inputs.  It is easily expandable to read analog inputs and use those values in MIDI commands.  The beauty of this standardized approach is that the sensing device will be compatible with any MIDI host, including audio programs and actual audio equipment.<br>
+<br>
+I needed to find some sort of sound or music for this thing to play, and I thought it would be super awesome for it to play some music from the Vsauce channel on YouTube.  I found the author of this music, "Going Down" by Jake Chudnow, and asked him if I could have permission to use his music for this exhibit.  He gave us permission and has even offered to send us the original individual tracks of this song.<br>
+<br>
+I have quickly transcribed each track of this song for prototyping purposes, and I have put these tracks into the free LMMS audio software.  I am now able to enable and disable each track with buttons.  I transcribed a total of 5 tracks and I wired up 8 buttons, so I used the remaining 3 to control effects such as echo and phaser on particular channels.  This required me to connect the MIDI commands with the effects in LMMS.  We may be able to place 2 sensors in the same seat, enable the track with the one you sit on, and enable that track's effect if you lean back.<br>
+<br>
+Right now I read each button's value and if it changes from the last time it was read, I send a MIDI control change &rarr; channel volume event.  When a button is released, it sends volume 0, and when pressed it sends volume 127.  The channel in the MIDI command corresponds with which particular button was pressed.<br>
+<br>
+<center><img src="./musical_furniture/musical_furniture_breadboard.jpg"></center><br>
+<br>
+Currently there is an issue in LMMS - I have been able to make it loop but I am not able to find a way for it to start playing automatically.  It requires someone to press play on the computer.  So, if I was to set a startup item to open "Going Down," and then if the computer was restarted, everything would happen automatically except for the play button.  I tried issuing a "resume" MIDI command periodically but that actually stopped the whole thing from working.<br>
+<br>
+Also, if I remove the USB cable and plug it back in, LMMS does not continue looking for the MIDI device - I have to relaunch the program.  I think the solution to this is to refrain from unplugging the USB cable!
+
+<br><br><hr><br>
+
+2/2/13<br>
+<br>
+There was an issue where the microcontroller sometimes entered a strange state where not all MIDI events were sent properly.  Some channels would stay on when no buttons were being pressed, for example.<br>
+<br>
+To address this, first I added some debouncing for the buttons in the microcontroller.  I also enabled internal pull-ups, so I will be able to remove the external pull-ups that I used.  For the MIDI communication, I didn't check to see if the MIDI command was finished being sent before attempting to send another.  Because I am using the mystery USB code that Microchip has supplied, I'm not particularly sure how to tell when a MIDI message is finished.  So, I put a timer in there that makes sure to wait at least 1.5 msec between sending any MIDI command.  That should be plenty of time for it to do whatever it needs to do.<br>
+<br>
+Though I did not spend the time to specifically locate this issue, these measures may help.  If the issue comes back, then I will continue to investigate it.
+
+<br><br><hr><br>
+
+2/3/13<br>
+<br>
+I now have LMMS running properly under CentOS, and the MIDI device that I created is also working with it.  I have to log in as root for it to see the MIDI device, but that's probably not too big of a deal.  I modified the source code of LMMS to periodically query the play status, and if it is not playing it starts it playing.  Because of this, this particular build plays automatically and is not able to ever stop playing.  That's the behavior that we want I think.
+
+<br><br><hr><br>
+
+2/5/13<br>
+<br>
+I decided to use the first board I started for musical furniture instead of smart curtain.  I added LED indicators for each cushion button.  We can easily test the buttons this way.  Also, this will make stuck buttons obvious.  These are ultra-bright blue LEDs, so I used 100k&ohm; series resistors to bring them to a tolerable level.<br>
+<br>
+All that is needed on this board is some Molex type KK connectors.  If it isn't too much of a hassle, I may also add an ICSP header so I can reprogram the microcontroller without removing it from its socket.<br>
+<br>
+<center><img src="./musical_furniture/need_kk.jpg"></center><br>
+<br>
+I am still passing the newbie test, no light through my solder connections:<br>
+<br>
+<center><img src="./musical_furniture/noob_test.jpg"></center><br>
+<br>
+You may have noticed in the images that I have transitioned from the 18F4550 to the smaller 18F2550 for this project as well.  The 4550 and 2550 are identical apart from how many pins are available.  I have tested the board with LMMS and it is working fine as a real USB MIDI device.
+
+<br><br><hr><br>
+
+2/16/13<br>
+<br>
+The breadboard is finished now.  It has 2-pin KK connectors connectors for 10 buttons.  5 buttons will be in seats of the furniture, and 5 will be in the backs.  This was expanded form the original design with 8 buttons.  Port B is the only port with internal pull-up resistors, so I had to put on external pull-ups for these extra 2.  Unfortunately, I ran out of these small blue LEDs, so I had to use green ones.  This board now has a power indicator.<br>
+<br>
+<center><img src="./musical_furniture/final_breadboard.jpg"></center><br>
+<br>
+I crimped on some KK housings for the cushion buttons and hooked some up for testing.  LMMS would not remember the back button for seat #2 for anything.  This enables an echo effect.  I would reassign the button, that made it work, then I saved and relaunched LMMS, and boom, didn't work.  After lots of fiddling, I deleted the echo effect, added it back, assigned the button, saved, and then it remembered it.  Who knows why.  But it seems to be working now.  The sound files do not loop 100.000% perfectly, so one of the channels has a little click each time it loops.  That sucks, but honestly this is free software, so it's hard to complain.  I should be able to tweak the sound file to avoid the click.<br>
+<br>
+<center><img src="./musical_furniture/pads.jpg"></center><br>
+<br>
+I improved our version of "Going Down" by Jake Chudnow to sound more like the original.  3 of the 5 back buttons add an extra track to the sound produced by the respective seat button, for example, adding extra notes or octaves.  I have preserved the ability for it to play just the "extra parts" when only the back button is pressed.  On the other two, the back button enables an effect (echo, etc), so there isn't a very good way to play just the effect.  This is somewhat inconsistent.  We will have to play with this and see how much of an issue it is - it may not be a big deal.
+
+<br><br><hr><br>
+
+3/29/13<br>
+<br>
+I have started to make a custom program for this that we can use instead of LMMS.  LMMS has proven to be VERY unreliable for this use, as it forgets settings and loses connection to the controller.  When the sound loops in LMMS it clicks audibly, which is unacceptable.  Closing and relaunching LMMS periodically throughout the day is definitely not an option.<br>
+<br>
+The new program will support 5.1 channel surround sound.  I am using Port Audio to control each channel separately so we can have a speaker for each seat.  I am using libsndfile to open the .WAV files and convert them into raw data in RAM.  I have also redone the controller firmware to be HID like smart curtain instead of MIDI like it was.  This will allow me to easily use HIDAPI library.  The HID setup has the advantage of not being event-based.  If I miss a communication for some reason, it won't cause me to get a channel stuck with HID - it will catch it in the next update.<br>
+<br>
+The 5.1 channel SoundBlaster card that I have is not supported by the version of Alsa included with CentOS, so I have used a 4.1 channel sound card for development.  Right now, the program is listening to the HID device and turning individual channels on and off.  The program literally loops the sound perfectly.  It is not possible for the channels to go out of sync by even one frame, which was also an issue in LMMS.  For the subwoofer channel, I have programmed it to combine all channels and do a low-pass filter.  When channels turn on and off, I have programmed in a very short fade effect that prevents the click sound that we would hear if I just slammed the channels on and off.<br>
+<br>
+Alsa is responsible for the sound card driver and it can not be upgraded in CentOS without changing the kernel in such a way that isn't supported.  So I am on the hunt for a different Linux distribution that will support all of these things.<br>
+<br>
+I found Puppy Linux, which is super lightweight and seemed just perfect for this.  It starts up in like 15 seconds.  Alsa is at the latest version and supports my sound card and PortAudio is running fine, but HIDAPI will not run because it is missing the libudev library.  Libudev is not available in the package manager, so I attempted to install it from source and that was a nightmare.  So I am looking for another Linux.  I have my sights set on Lubuntu now.<br>
+<br>
+Not having heard Going Down on the sound system yet, some of us are worried that it may not be an ideal song for this exhibit.  We could probably improve it for our purpose.  By having our own program for this, we will be able to let visitors swap songs in the future if we want.
+
+<br><br><hr><br>
+
+3/30/13<br>
+<br>
+I have it running on Lubuntu on all 5.1 channels with a USB HID device tonight.  It is pretty much finished at this point other than adding the ability to switch songs.
+
+<br><br><hr><br>
+
+4/18/13<br>
+<br>
+This is now installed and running at The Works.  The exhibit opens to the public on 4/19/13.
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

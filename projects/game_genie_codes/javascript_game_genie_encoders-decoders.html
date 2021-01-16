@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html><head><title>JavaScript Game Genie Encoders/Decoders 0.0.4 (and some Forms)</title>
+<meta charset="UTF-8"/>
+<link id="favicon" rel="icon" type="image/gif" href="data:image/gif;base64,R0lGODlhEAAQAKEDAAAAANwgAPz8/P///yH5BAEKAAMALAAAAAAQABAAAAI3nI+pB7sQmgGNygFEiHhTj1lWxEFkoHlktW1p+0lmS0NXR9fKV9+J6HtwHJMZxZHJDX9AC/FZAAA7" /><script type="text/javascript">if(new Date().getMilliseconds() % 50 == 1) document.getElementById('favicon').href = "data:image/gif;base64,R0lGODlhEAAQAKECAAAAAL1EAP///////yH/C05FVFNDQVBFMi4wAwEAAAAh+QQFFAADACwAAAAAEAAQAAACNZwPCccMgppUS7Y3qkVQ79x9XCaCRvJhiMcJ7os6QkDTcxCD9V7HAL+b+YLA3A9Iy50ozEMBACH5BAUUAAMALAQACgAIAAUAAAIKjG+jO6KCInJMFQAh+QQFFAADACwEAAoACAAFAAACCpw/YhLt7xQyUBYAIfkEBRQAAwAsBAAKAAgABQAAAgqMb4Iy7Y8OGwoVADs=";</script>
+<script type="text/javascript">
+/* This program is free software. It comes without any warranty, to
+ * the extent permitted by applicable law. You can redistribute it
+ * and/or modify it under the terms of the Do What The Fuck You Want
+ * To Public License, Version 2, as published by Sam Hocevar. See
+ * http://sam.zoy.org/wtfpl/COPYING for more details. */
+
+/* *****************************************************************************
+JavaScript Game Genie Encoders/Decoders [0.0.4]
+
+Set of JavaScript encoder/decoder functions for the Game Genie game enhancers.
+Written because I spent many years searching fruitlessly for someting simple to
+use and universally portable (without having to download, compile, or install).
+
+Notes:
+* Yes, strings are inefficient. This was mostly an attempt to understand the
+  annoying bit operations (rotation, shifting, XOR, NOT) that Codemasters used
+  to obfuscate the codes. Also, as JavaScript does not support 40 bit integers
+  for bitwise operators (which are needed for 4 of the 5 game genies), this was
+  far easier for me. See http://games.technoplaza.net/ggencoder/ for bitwise
+  versions.
+* The NES Game Genie only addresses 15 bits of ROM space (0000-7FFF = RAM, 8000-
+  FFFF = ROM) but as one bit is used for code length this is autocorrected when
+  decoding. Trying to generate a Game Genie code outside this range will simply
+  adjust.
+* The Game Boy Game Genie doesn't write above 7FFF, and the Game Gear Game
+  Genie doen't write above BFFF. Addresses are stored with full 16 bits and this
+  is NOT autocorrected, so be aware the codes may have no affect on the actual
+  hardware (but some emulators may write them to RAM correctly).
+* I am unclear as to the limits of the Game Genie and Pro Action Replay on the
+  16 bit systems. Meh, whatever.
+* Encoders return strings, decoders return associative arrays (objects) with
+  x.address, x.value, and x.key.
+
+With thanks to the following resources (and others) for specs (but not code):
+http://www.monmouth.com/~colonel/videogames/nes/genie.html
+http://developer.mozilla.org/en/JavaScript/Reference/Operators/Bitwise_Operators
+http://games.technoplaza.net/ggencoder/
+http://www.ticalc.org/archives/files/fileinfo/186/18686.html
+http://www.gshi.org/vb/threads/2350-Majestic-Porter/page2
+http://www.gshi.org/?s=faqs&id=114
+
+Todo:
+* fixGGGB() function? meh, someone can just run it through decode/encode to fix
+* detect <enter> keystroke in input type="text" and click button thingy
+* query string operation?
+***************************************************************************** */
+
+var gg = {'nes':'AEPOZXLUGKISTVYN','snes':'DF4709156BC8A23E','gen':'ABCDEFGHJKLMNPRSTVWXYZ0123456789','gggb':'0123456789ABCDEF'};
+
+function fixNES(code) {
+  //Fix NES GG codes with incorrect 16th bit address values (which determines code length).
+  if(code.replace(RegExp('[' + gg.nes + ']','gi'),'').length != 0) return false
+  if(code.length !=8 && code.length !=6) return false
+  code = code.toUpperCase();
+  if(gg.nes.indexOf(code.substr(2,1)) % 2 == 1) {
+    if(code.length != 8) code = code.substr(0,2) + gg.nes.substr(gg.nes.indexOf(code.substr(2,1))-1,1) + code.substr(3,3)
+  } else {
+    if(code.length != 6) code = code.substr(0,2) + gg.nes.substr(gg.nes.indexOf(code.substr(2,1))+1,1) + code.substr(3,5)
+  }
+  return code;
+}
+
+function decodeNES(code) {
+  var bits = '';
+  var nibs = [];
+  code = code.toUpperCase();
+  if(code.replace(RegExp('[' + gg.nes + ']','gi'),'').length != 0) return false
+
+  if(gg.nes.indexOf(code.substr(2,1)) % 2 == 1) {
+    if(code.length != 8) return false
+  } else {
+    if(code.length != 6) return false
+  }
+  for(var i=0;i<code.length;i++) {
+    var j = gg.nes.indexOf(code[i]);
+    bits += pad(j.toString(2),4);
+  }
+
+  //See http://www.monmouth.com/~colonel/videogames/nes/genie.html
+  bits = bits.substr(bits.length-1,1) + bits.substr(0,bits.length-1);
+  nibs[5] = bits.substr(0,4);
+  nibs[4] = bits.substr(4,4);
+  nibs[2] = bits.substr(8,4);
+  nibs[0] = '0' + bits.substr(13,3);
+  nibs[3] = bits.substr(16,4);
+  nibs[1] = bits.substr(20,4);
+  if(code.length == 8) {
+    nibs[7] = bits.substr(24,4);
+    nibs[6] = bits.substr(28,4);
+  }
+
+  for(var i=0;i<code.length;i++) {
+    nibs[i] = parseInt(nibs[i],2).toString(16).toUpperCase();
+  }
+  nibs = nibs.join('');
+
+  if(code.length == 8) {
+    return {'address':nibs.substr(0,4),'value':nibs.substr(4,2),'key':nibs.substr(6,2)};
+  } else {
+    return {'address':nibs.substr(0,4),'value':nibs.substr(4,2),'key':false};
+  }
+}
+
+function encodeNES(address,value,key) {
+  var bits = '';
+  var nibs = [];
+  var code = '';
+  var len = (key) ? 8 : 6;
+  if(address.length != 4 || value.length != 2 || (key && key.length != 2)) return false
+  if(parseInt(address,16) > 32767) address = (parseInt(address,16) - 32768).toString(16)
+  var raw = address + value;
+  if(key) raw += key;
+  if(raw.replace(/[0-9A-F]/gi,'').length != 0) return false
+  for(var i=0;i<raw.length;i++) {
+    var j = parseInt(raw[i],16);
+    nibs[i] = pad(j.toString(2),4);
+  }
+
+  //See http://www.monmouth.com/~colonel/videogames/nes/genie.html
+  if(len==8) {
+    bits = nibs[5] + nibs[4] + nibs[2] + '1' + nibs[0].substr(1,3) + nibs[3] + nibs[1] + nibs[7] + nibs[6];
+  } else {
+    bits = nibs[5] + nibs[4] + nibs[2] + '0' + nibs[0].substr(1,3) + nibs[3] + nibs[1];
+  }
+  bits = bits.substr(1,bits.length) + bits.substr(0,1);
+
+  for(var i=0;i<len;i++) {
+    var j = bits.substr(i*4,4);
+    j = parseInt(j,2);
+    code += gg.nes.substr(j,1);
+  }
+  return code;
+}
+
+function decodeSNES(code) {
+  var bits = '';
+  var nibs = [];
+  if(code.length != 9) return false
+  code = code.substr(0,4).toUpperCase() + code.substr(5,4).toUpperCase();
+  if(code.replace(RegExp('[' + gg.snes + ']','gi'),'').length != 0) return false
+  for(var i=0;i<code.length;i++) {
+    var j = gg.snes.indexOf(code[i]);
+    bits += pad(j.toString(2),4);
+  }
+
+  //1-8 = value, A-X = addy -> 1234 5678 IJKL QRST OPAB CDUV WXEF GHMN
+  nibs[0] = bits.substr(18,4);
+  nibs[1] = bits.substr(26,4);
+  nibs[2] = bits.substr(8,4);
+  nibs[3] = bits.substr(30,2) + bits.substr(16,2);
+  nibs[4] = bits.substr(12,4);
+  nibs[5] = bits.substr(22,4);
+  nibs[6] = bits.substr(0,4);
+  nibs[7] = bits.substr(4,4);
+
+  for(var i=0;i<8;i++) {
+    nibs[i] = parseInt(nibs[i],2).toString(16).toUpperCase();
+  }
+  nibs = nibs.join('');
+
+  return {'address':nibs.substr(0,6),'value':nibs.substr(6,2)};
+}
+
+function encodeSNES(address,value) {
+  var bits = '';
+  var nibs = [];
+  var code = '';
+  if(address.length != 6 || value.length != 2) return false
+  var raw = address + value;
+  if(raw.replace(/[0-9A-F]/gi,'').length != 0) return false
+  for(var i=0;i<8;i++) {
+    var j = parseInt(raw[i],16);
+    nibs[i] = pad(j.toString(2),4);
+  }
+
+  //1-8 = value, A-X = addy -> KLMN STUV ABCD WXIJ EFGH OPQR 1234 5678
+  var temp1 = nibs[3].substr(2,2) + nibs[0].substr(0,2) + nibs[0].substr(2,2);
+  bits = nibs[6] + nibs[7] + nibs[2] + nibs[4] + temp1 + nibs[5] + nibs[1] + nibs[3].substr(0,2);
+  for(var i=0;i<8;i++) {
+    var j = bits.substr(i*4,4);
+    j = parseInt(j,2);
+    code += gg.snes.substr(j,1);
+    if(i == 3) code+= '-';
+  }
+  return code;
+}
+
+function decodeGEN(code) {
+  var bits = '';
+  var nibs = [];
+  if(code.length != 9) return false
+  code = code.substr(0,4).toUpperCase() + code.substr(5,4).toUpperCase();
+  if(code.replace(RegExp('[' + gg.gen + ']','gi'),'').length != 0) return false
+  for(var i=0;i<code.length;i++) {
+    var n = gg.gen.indexOf(code[i]);
+    bits += pad(n.toString(2),5);
+  }
+  //a-p = value, A-X = addy -> ijkl mnop IJKL MNOP ABCD EFGH defg habc QRST UVWX
+  nibs[0] = bits.substr(16,4);
+  nibs[1] = bits.substr(20,4);
+  nibs[2] = bits.substr(8,4);
+  nibs[3] = bits.substr(12,4);
+  nibs[4] = bits.substr(32,4);
+  nibs[5] = bits.substr(36,4);
+  nibs[6] = bits.substr(29,3) + bits.substr(24,1);
+  nibs[7] = bits.substr(25,4);
+  nibs[8] = bits.substr(0,4);
+  nibs[9] = bits.substr(4,4);
+  for(var i=0;i<10;i++) {
+    nibs[i] = parseInt(nibs[i],2).toString(16).toUpperCase();
+  }
+  nibs = nibs.join('');
+  return {'address':nibs.substr(0,6),'value':nibs.substr(6,4)};
+}
+
+function encodeGEN(address,value) {
+  var bits = '';
+  var nibs = [];
+  var code = '';
+  if(address.length != 6 || value.length != 4) return false
+  var raw = address + value;
+  if(raw.replace(/[0-9A-F]/gi,'').length != 0) return false
+  for(var i=0;i<10;i++) {
+    var j = parseInt(raw[i],16);
+    nibs[i] = pad(j.toString(2),4);
+  }
+
+  //a-p = value, A-X = addy -> ijkl mnop IJKL MNOP ABCD EFGH defg habc QRST UVWX - (inversed)
+  var temp1 = nibs[6].substr(3,1) + nibs[7].substr(0,3);
+  var temp2 = nibs[7].substr(3,1) + nibs[6].substr(0,3);
+  bits = nibs[8] + nibs[9] + nibs[2] + nibs[3] + nibs[0] + nibs[1] + temp1 + temp2 + nibs[4] + nibs[5];
+
+  for(var i=0;i<8;i++) {
+    var j = bits.substr(i*5,5);
+    j = parseInt(j,2);
+    code += gg.gen.substr(j,1);
+    if(i == 3) code+= '-';
+  }
+  return code;
+}
+
+function decodeGGGB(code) {
+  var bits = '';
+  var nibs = [];
+  if(code.length != 7 && code.length != 11) return false
+  code = code.toUpperCase();
+  code = code.substr(0,3) + code.substr(4,3) + code.substr(8,1) + code.substr(10,1);
+  if(code.replace(RegExp('[' + gg.gggb + ']','gi'),'').length != 0) return false
+
+  for(var i=0;i<code.length;i++) {
+    var j = gg.gggb.indexOf(code[i]);
+    bits += pad(j.toString(2),4);
+  }
+
+  //VVAAAACSC, 1234 5678 ABCD EFGH IJKL MNOP abcd ---- efgh,
+  //value: 1234 5678, address: ([not] MNOP) ABCD EFGH IJKL, compare: (ghab cdef [xor] 10111010)
+  nibs[0] = stringNOT(bits.substr(20,4));
+  nibs[1] = bits.substr(8,4);
+  nibs[2] = bits.substr(12,4);
+  nibs[3] = bits.substr(16,4);
+  nibs[4] = bits.substr(0,4);
+  nibs[5] = bits.substr(4,4);
+  if(code.length == 8) {
+    var cbits = stringXOR(bits.substr(30,2) + bits.substr(24,4) + bits.substr(28,2),'10111010');
+    nibs[6] = cbits.substr(0,4);
+    nibs[7] = cbits.substr(4,4);
+  }
+
+  for(var i=0;i<code.length;i++) {
+    nibs[i] = parseInt(nibs[i],2).toString(16).toUpperCase();
+  }
+  nibs = nibs.join('');
+
+  if(code.length == 8) {
+    return {'address':nibs.substr(0,4),'value':nibs.substr(4,2),'key':nibs.substr(6,2)};
+  } else {
+    return {'address':nibs.substr(0,4),'value':nibs.substr(4,2),'key':false};
+  }
+}
+
+function encodeGGGB(address,value,key) {
+  var bits = '';
+  var nibs = [];
+  var code = '';
+  var len = (key) ? 9 : 6;
+  if(address.length != 4 || value.length != 2 || (key && key.length != 2)) return false
+  var raw = address + value;
+  if(key) raw += key;
+  if(raw.replace(/[0-9A-F]/gi,'').length != 0) return false
+
+  for(var i=0;i<raw.length;i++) {
+    var j = parseInt(raw[i],16);
+    nibs[i] = pad(j.toString(2),4);
+  }
+
+  //Arr annoyingly complex >_<... fuck you "Codemasters"!
+  var bits = nibs[4] + nibs[5] + nibs[1] + nibs[2] + nibs[3] + stringNOT(nibs[0]);
+  if(len == 9) {
+    var cbits = stringXOR(nibs[6] + nibs[7],'10111010');
+    cbits = cbits.substr(2,6) + cbits.substr(0,2);
+    var shadow = stringXOR(cbits.substr(0,4),'1000');
+    bits += cbits.substr(0,4) + shadow + cbits.substr(4,4);
+  }
+
+  for(var i=0;i<len;i++) {
+    var j = bits.substr(i*4,4);
+    j = parseInt(j,2);
+    code += gg.gggb.substr(j,1);
+    if(i == 2 || (i == 5 && len == 9)) code += '-'
+  }
+  return code;
+}
+
+function pad(str,pad) {
+  while(str.length < pad) str = '0' + str
+  return str;
+}
+
+function stringXOR(a,b) {
+  var xor = '';
+  for(var i=0;i<a.length;i++) xor += (a[i] == b[i]) ? '0' : '1'
+  return xor;
+}
+
+function stringNOT(a) {
+  var not = '';
+  for(var i=0;i<4;i++) not += (a[i] == '1') ? '0' : '1'
+  return not;
+}
+
+/* *****************************************************************************
+Some UI to go with the above functions.
+Nothing below this is needed for the functions.
+***************************************************************************** */
+
+function swaptab(e) {
+  var e = window.event || e;
+  var target = e.target || e.srcElement;
+  if(target.tagName.toLowerCase() != 'a' || target.className != 'tab') return false
+  loadtab(target.id);
+}
+
+function loadtab(id) {
+  if(!id && document.location.hash != '') var id = 'tab-' + document.location.hash.replace('#','');
+  var selected = document.getElementById(id);
+  if(!selected) return
+  var tabs = document.getElementById('tabs').getElementsByTagName('a');
+  for(var i=0;i<tabs.length;i++) {
+    var page = document.getElementById(tabs[i].id + '-page');
+    if(tabs[i] == selected) {
+      tabs[i].className = 'tab selected';
+      page.className = 'page visible';
+      document.location.hash = tabs[i].id.substr(4);
+    } else {
+      tabs[i].className = 'tab';
+      page.className = 'page';
+    }
+  }
+}
+
+function doDecodeForm(sys) {
+  var out = document.getElementById('output-' + sys);
+  var code = document.getElementById('input-' + sys + '-gg');
+  if(sys == 'nes') {
+    var fix = fixNES(code.value);
+    if(fix) code.value = fix;
+  }
+  var raw = eval('decode' + sys.toUpperCase() + '("' + code.value + '")');
+  if(raw) {
+    out.value += formatOutputForm(sys,code.value,raw.address,raw.value,raw.key) + '\n';
+  } else {
+    out.value += code.value + ' ~ Bad input\n';
+  }
+}
+
+function doEncodeForm(sys) {
+  var out = document.getElementById('output-' + sys);
+  var add = document.getElementById('input-' + sys + '-add');
+  if(sys == 'nes' && parseInt(add.value,16) > 32767) add.value = (parseInt(add.value,16) - 32768).toString(16)
+  var val = document.getElementById('input-' + sys + '-val');
+  var key = document.getElementById('input-' + sys + '-key') || false;
+  var keyOrFalse = false;
+  if(hexOnly(add.value) != '') add.value = pad(hexOnly(add.value),parseInt(add.getAttribute('maxlength')));
+  if(hexOnly(val.value) != '') val.value = pad(hexOnly(val.value),parseInt(val.getAttribute('maxlength')));
+  if(key && hexOnly(key.value) != '') {
+    key.value = pad(hexOnly(key.value),2);
+    keyOrFalse = '"' + key.value + '"';
+  }
+  var code = eval('encode' + sys.toUpperCase() + '("' + add.value + '","' + val.value + '",' + keyOrFalse + ')');
+  if(code) {
+    out.value += formatOutputForm(sys,code,add.value,val.value,key.value) + '\n';
+  } else {
+    out.value += add.value + ' ' + val.value + ' ' + key.value + ' ~ Bad input\n';
+  }
+}
+
+function formatOutputForm(sys,code,add,val,key) {
+  var line = code + '  ';
+  switch(sys) {
+    case 'nes':
+      if(code.length == 6) line += '  '
+      line += add + ' ' + val;
+      if(key) line += ' ' + key
+    break;
+    case 'snes':
+    case 'gen': line += add + ' ' + val; break;
+    case 'gggb':
+      if(code.length == 7) line += '    '
+      line += add + ' ' + val;
+      if(key) line += ' ' + key
+    break;
+  }
+  return line;
+}
+
+function doBatchForm() {
+  var input = document.getElementById('batch-input');
+  var output = document.getElementById('batch-output');
+  var systemrad = document.getElementsByName('system');
+  var actionrad = document.getElementsByName('action');
+  var system = '';
+  var action = '';
+  for(var i=0;i<systemrad.length;i++) if(systemrad[i].checked == true) system = systemrad[i].value
+  for(var i=0;i<actionrad.length;i++) if(actionrad[i].checked == true) action = actionrad[i].value
+  var keepcom = document.getElementById('checkbox-comments').checked;
+  var keeptex = document.getElementById('checkbox-text').checked;
+  var keepcou = document.getElementById('checkbox-counterparts').checked;
+  var text = input.value.split('\n');
+  var out = '';
+
+  if(action == 'decode') {
+    //decode
+    var reg = {
+      'nes':/[AEPOZXLUGKISTVYN]{8}|[AEPOZXLUGKISTVYN]{6}/g,
+      'snes':/[0-9A-F]{4}-[0-9A-F]{4}/g,
+      'gen':/[0-9A-HJ-NPR-TV-Z]{4}-[0-9A-HJ-NPR-TV-Z]{4}/g,
+      'gggb':/[0-9A-F]{3}-[0-9A-F]{3}-[0-9A-F]{3}|[0-9A-F]{3}-[0-9A-F]{3}/g
+    }
+
+    for(var i=0;i<text.length;i++) {
+      if(reg[system].test(text[i])) {
+        //match
+        var found = text[i].match(reg[system]);
+        var comment = text[i].split(reg[system]);
+        if(comment[0].replace(/\s\t\r/g,'') != '' && keeptex) out += comment[0] + '\n';
+        for(var k=0;k<found.length;k++) {
+          if(system == 'nes') found[k] = fixNES(found[k])
+          var raw = eval('decode' + system.toUpperCase() + '("' + found[k] + '")');
+          out += raw.address + ' ' + raw.value + ' ';
+          if(raw.key) out += raw.key + ' '
+          if(keepcou) out += '[' + found[k] + '] '
+          if(keepcom) out += ' ' + comment[k+1].replace(/^[\s\t]{1,}/ig,'')
+          out += '\n';
+        }
+      } else {
+        //no match
+        if(keeptex) out += text[i] + '\n'
+      }
+    }
+  } else {
+    //encode
+    var reg = {
+      'nes':/^([0-9a-f]{4})[ :]([0-9a-f]{2})[ :]([0-9a-f]{2})|^([0-9a-f]{4})[ :]([0-9a-f]{2})/i,
+      'snes':/^([0-9a-f]{6})[ :]([0-9a-f]{2})/i,
+      'gen':/^([0-9a-f]{6})[ :]([0-9a-f]{4})/i,
+      'gggb':/^([0-9a-f]{4})[ :]([0-9a-f]{2})[ :]([0-9a-f]{2})|^([0-9a-f]{4})[ :]([0-9a-f]{2})/i
+    }
+    for(var i=0;i<text.length;i++) {
+      if(reg[system].test(text[i])) {
+        //match
+        var found = text[i].match(reg[system]);
+        var comment = text[i].replace(reg[system],'');
+        var add = found[4] || found[1];
+        if(system == 'nes' && parseInt(add,16) > 32767) add = (parseInt(add,16) - 32768).toString(16)
+        var val = found[5] || found[2];
+        var keyOrFalse = found[3] || false;
+        if(keyOrFalse) keyOrFalse = '"' + keyOrFalse + '"'
+        var code = eval('encode' + system.toUpperCase() + '("' + add + '","' + val + '",' + keyOrFalse + ')');
+        if(!code && system == 'nes') code = 'invalid address' 
+        out += code + ' ';
+        if(keepcou) out += '[' + found[0] + '] '
+        if(keepcom) out += ' ' + comment.replace(/^[\s\t]{1,}/ig,'')
+        out += '\n';
+      } else {
+        //no match
+        if(keeptex) out += text[i] + '\n'
+      }
+    }
+  }
+  output.value = out;
+}
+
+function hexOnly(str) {
+  str = str.toUpperCase();
+  str = str.replace(/[^0-9A-F]/g,'');
+  return str;
+}
+
+</script>
+<style type="text/css">
+#pagewrapper {float:left;border:1px solid black;}
+#tabs {background-color:#999999;padding:3px 3px 0 3px;}
+.tab {border:2px inset black;margin:2px 2px 0 5px;display:block;float:left;padding:3px 5px 2px 45px;background:#ffffff 8px center no-repeat;font-size:10pt;border-bottom:1px solid #999999;margin-left:5px;height:22px}
+.selected {border-style:outset;padding:2px 8px 3px 42px;background-position:5px center;border-bottom:1px solid white;margin:2px 5px 0 2px;}
+/* generated with http://www.sveinbjorn.org/dataurlmaker */
+#tab-nes {background-image: url("data:image/gif;base64,R0lGODlhIAAYAOf5AAsHDQ4MEBEOEhMQFBYREBQSFhUTFxYUFxgXGhkXGhUZGhYZGxoYGxsZHBsaHR8dICIeHSUhICEjIC0pKDQ2Mzs2NT05OEM/PkVBQEdDQUtEPkZIRUhJR01JSE9LSlJLRVRPTlZPSVJSSlZRUFhRS1lSTFNUUlhTUlpTTVlUU1tUTlxVT1hXT1pWVV1XUFtXVl5XUVxYVl9YUl1ZV15aWF9aWVxcVGBbWmFcW2NcVmJdXGRdV2NeXWRfXmZfWWZhYGhhW2VkXGdmXmxlXm5paHJubHZuaHdvaXVxb3lxa311b4B4coB7eoV9d36AfYGAeJl6bpp7b5Z/doqCfJt+d51+couDfYSGg4mGeIqFhI2Ff4WHhJqDeqCJgJCPh52MgpiOgpGQiJ6Ng5+OhJmRi56Qi5qSjJuTjZyUjp2Vj6GWiqOVkJuYip6XkKWWkaCZkqeYk6Gak6iZlKKblKmalaSclaqblqWdlp2fnKael6GgmKefmKCin6qim6ujnK2lnqinnrCooaiqp7GpoqmrqLOrpLOurLSvrbevqLWxo76vqrezpbyypb2zpruzrL60p7+1qLW3tMC4scO4q8S5rMO7tLu9usC9rsG8usW8tb7BvcvDvM3FvtDFuMbIxdXFwM/KyMrMydPKw9DLyc7NxNjLzNLNzNXNxtbOx9fPyNrPwt7OydjQydnRytrSy9nT0tzTzN3UzdrV09XX1N7VzuHU1NbY1d/Wz+LV1dzX1ePW193Y1uDY0OTX2N7Z2OHZ0uXY2eLa0+Da2ePb1OHb2tvd2uja2+Tc1eLc2+Pd3Obd1uzc1+Te3d7g3efe1+rd3ejf2OXg3ung2ebh3+fi4Ojj4uPl4erk4+vl5OXn5Ozm5e3n5u7o5+vq4enr6O/q6Ors6fDr6fPt7O3v6/Xv7vbw7/L08fr18/T38/z29fb49P339vf59vj69/b7/vn7+Pr8+ff9//v9+v/8+vj+///9+/n///z/+/7//P///////////////////////////yH5BAEKAP8ALAAAAAAgABgAAAj+APEJHEiwoMGDCBMqXMiwocOHD+kJlAev4jx58xJKRLgR37ty13btEsaM2rZw5MydY/dOnjyFGfGt24asVi1cu3oBA2bMmDJlzKZdiwVIUCRr6N4ZRJfs1StZN3UBI2Ys2TNm0JwpW7aKEqNEi24po6ZUoLhXoEaVOpWqFaxbvH46cxaNGTNlqiA1gjSJFjFi3eANzGQmzx9FmDZ9QgWL1q3HPJnd6vToEaNHrJQJgzZOsEBObdBIiUKlTB4/gRBJ2oTqFjRYYZ5g8cImFbFdyLSBK4uP1Jw4YrhUgTLGTR04curcydMnBQUONoRckqYMGTVu4QRm1KRkChkyZsj+uOnyZU4dO3TqmKkwwIAADIMyiVL2DVs7grZ0pEDh40gTK2CoMUdycbxBhgUNNGCAB2SgQcYp4VgzkDvFOGJEDSOg8IEI/A2RxBJakLHHGRYk8EADMbTxxhyv5HKfQPRoU8gUM7hAggYolJBCDTXcwEMPOfgwwQALDPADHG/oMco1B3ljSBAy7IDCCDHgoIMOOPA4AgQHGECACVakkcco8SQkjy2HZMEEEjjAgGWWJzAAQAABXDACCEXY4pA5zYRCyBU+hFDDChIEIEAAGaQQwxbqQIQPPOqYYwsfRESwQAINdDADD7M4CiNB6VjixAYs+ICHpwt54wk7qHLU6qsDAgUEADs=");}
+#tab-snes {background-image: url("data:image/gif;base64,R0lGODlhIAAYAOf/ACUyOCw3N1MmgjY4NU0rfC89Qjs/QUM+PTRCSEBERjlITUNISj1LUElNT0tNSmU+mD5QWkJQVVJNTGc/m0BSXGpCnlJUUUNZXVlUU0taX1dZVkpcZ2xQg1RcY09eY2BbWk9eb2xUjGBdYVJhZl5gXW1YiVxhY1tjX2Jia19kZlhmbHpVt3xZqGdoZl9qa2tpbXpim2hsb2prdG1rb25scGpucV9xfG1vbF50eYdjs21ydG1xf3Byb3BxeoRoqXZycHRydnN0fXh2eoRzh3p4fHV6fXl7eHx6fnx8hn99gYJ8h5Fztn1+h32ChY1/jHeGjICFiIaEiHqJj4WGj4SJjIeIkX2MkoiKh4iJko+Ik4qKlI2KjpSFq52CvoiNj4CPlY6MkIyNlo2Ol5GOko6PmISTmY+QmZCSj5SRlZGSnJCUl5mSnouXmJSVn5iWmpaXoZ2XopyanpqapKaYpqGapqWboaWaraKcp52ep5ajo5+gqqicvJ6jpauhp6OlopuoqKSlrqimqqulsK+mrK6ns6ips6mrqJ6uta+svbOsuLassrmruLewvL2uyK+0t7K0sbiwyb6wvriyvbayw7G2uLi1uri0xbK3usGzwbm1xry1wcew2cG2ycG6xri+wLm/wcW/ysm93cLEwcnCzsbD1MHGyc/D18nF19PD3s/I1NPH29fM38zR1NTQ4tvQ5N7Q3tnS3t3S5d7T5tjV5tbY1dnW6OLU4uDU6NTZ2+HW6uTW5N/Y5OPX693a69jd3+TZ7OfZ5+Lb5+ba7uPb9Orb6efc7+Le8Ozd7Obf6+ne8uPg8ufg7erg5+3f7evg9O7g7uDl6OPl4eni7u3h9efj9erj7/Hi8evk8OLo6u/j9+nm6+nl9+zl8ezk/e3m8vDl+evn+fTl9Ovp7ezq7vPo/PTq8PDs/urv8vDu8vLv9Ozx9Pbw7/Dy7/Px9e7z9vXz9/T28/n2+/b49Pf59vj79/b7/vr8+f37//v9+v/8+/j+///9//n///z/+/7//P///yH5BAEKAP8ALAAAAAAgABgAAAj+AP0JHEiwoMGDCBMqXLjwnkF9DBM6FJgPHbNr6ewJnBiRIL545a49azZt5LNy8fARhMjwnTdixGwBqzbNWslpy66hi8dxIbsxkYKlekUMmTRk3MJlmzaN2rNr4+IptCfuVyM6SBKtGsWr2bOj1ciBy5btmbBdyNppJFhPnK5eHB6w2DRHySRe07JJ40YsmLRlz7JZM2YqEDuB+NZpmxWL1ypTXHwIgIEJDppEpKiBu9Y3GzlYoApF4aNOoDw/glzx4tXr1ixCQ5zM6bJkj6Q1k4xtI7eNkRkqVMZUoicQ3pkZSTTxMqaqTp8+gxaVqLAiRyhBMhDNioNlyxY0gXz+ETR0I8WMLJJuvVLUyVg3c5BCPCCAqtgdJli0hHHjhsejeQPRcoUDDoiAAh2nFLNUXtkgYwcn2RRDihxemNFGEQx8gQ1BopxggQYkmHDDEXeoQtYtsfziWSuAhAFGHG50kAEl8hRkDx8IDPBCD0b8IAQTeKTyC1PTZGKGGGToAQUDOOCi0kr+4PPHBQAkkMQNEtAQxA6WDCMLHliEoQYeMURgRWn5JOQLGy4EoAEGB7SQgg5aiIHFGHh4MYIKjnTkzzmXeLDAB0nUQEQQVbSBhw4ZPCGen/7Y44kHBRgAxBZNyNFGByAcQhykA0UjxQYANDAFFhTYwIo/+rAEqkAbpeShggIQlAHNqwlhQ8kn7uB6EEv4QNQqQwEBADs=");}
+#tab-gen {background-image: url("data:image/gif;base64,R0lGODlhIAAYAOf/AAkPEREVFxgUExgWGRUZGxgZFxYaHBwaHiAZHhgcHhkdHx4cHxwdGx8dIB8eISAeIhwgIiEfIiceHiYfIygfICcfJB4iJCMhJCUhIB8jJS4fISQiJiYiIR0kKiUjJiwiIyElJyYkJysjKCImKCclKCMnKSomJS0lKjgjJyUpKyUpKzgkKCooLCYqLDcmJC0pKDYnKSwqLScsLS0rLzMqKissMyktLzAsKyouMC4tMDYsLSsvMTAuMUIpMywwMjEvMioxODIwMzIwNEgqNi4yNDMxNS00Oi8zPy80NjsxMjA0NjUzNjE1NzY0N1EsOjI2ODg2OTg2OjQ4Ojk3O24nPzw4Nzw3QT83PDg6NzQ7QTc7PTk6Qjw6PT46OUM5Ojg8Pk81QD07Pjk9Pz48P0A8Ozw+Oz89QD89QTs/QUk7QkA+QkE/Qz1BQ0NBRT1EQEtAQUZCQUBERkVDRkdDQUNFQpUsSUZERz5FV0lEQz9GTUJGSEdFSUhGSlBFRkdJRkpITExIR4E4T1JHSEtJTU1JSEhMTkpMSk1LT0lNT05MT1BMSkZNX0pOUFFNTFBOUVNOTUxQUlJPU1RPTlNRVVpQUFFTUFRSVltSR1tRUVVTV6Q8W19URFVWVFdVWVlVVFZYVUJZhlRYW1lXW6JCXVVZXFtZXWNYWFxaXV5bTmVaSlhcXmBbWmdaVV5cX15gXVxhY15jZWhjUWJkYWplZHJlUG1oZ2hqZ3xnTmxqbm1rb2xtdm9tcY5kc2tvcnBucnZuaGxwc3Fvc3B0d4BybXR5fHt5fb1wjIKEgZCBfYiGioSJjI6JiI2Lj4mOkZaRj5SWk5iWmpuZnaCamZ6jpaajqKClqKSmo6umpK6op6arrrKtrLSvrbKwtLO1sr64t8C6ucG8ury+usnLyMrMydHT0NrV09zX1drc2drf4t3f3N/h3uHk4OTn4+vl5Onr6O7w7e/x7vfx8PL08fn08vT28/j1+vb49Pj69//6+fr8+fv9+v/9+/n///z/+/7//P///yH5BAEKAP8ALAAAAAAgABgAAAj+AP0JHEiwoMGDCBGek5ewYUJ0wNy8ahbOncOL/qr5UFBCyRc9rpSFU1cPY0F2oQAYAIGDSataquhUkmXrWDd2+C7em5bCAIQMKWzgebTHjyM2O3zQ8ePKGrl1Ce0Js8CgRQwbOC5I+CKmDBkua9awKcTIECdYxLL540cQXpwMF+hgKZCCCQcXZ7CkukXr0hcoX9AgAgHCyBNxBNM96RCgQxZSXKBICYHiipAcNzbFQmVDshIQBIB4eEawFwEbSu6AOsLly5oLJ+pQ6WFCQYMYX5Yo8RHBQosX5AiGezQjQY1FecyssbNmgpNRozQFGqIkBw0UMG4oaVDF4LdHklj7RFCipg2fQXZCVEjDyxgYERokRBDig8iAZQbX/XrkaRCLEWfwcQgkkaixwQAGbBDBAQMsUEwyTQigDkLbzAIIUT80YYclp2RySieHnAHFEks0kcguVvTR0DvezFKFIoRwEcUhvuRyiiiZHCIHF0sEEQQC11wkz3dkPOKIGUKIEo00u0TyxxpbTMHDBxaZdE0fczwyxhIz+MINNMFEYscYLMxij0kCzSONKTpsMEcOMeDCDDXOqEECNmgSxI42qyRRBAY/8BCGL7p4YU6eBOkTzzeUJEGGImGQ0MAsiFKIyRuC4PHJOJUilM82w7CCTKcN0VNOO6RilBNBAQEAOw==");}
+#tab-gggb {background-image: url("data:image/gif;base64,R0lGODlhIAAYAOf/ACsgNS4pMissMy4sMDcrQDUsPDgwNTcxOzo0Pj00REI3ODs4R0I3Qjw6Pj85Q0E4SEM3TT89QUY7RkM9R0Y+Q0Y9TUs/S0dBS0pBUU1DQ0dEU0tFT1FFUFJHSFBITUpLSUVNSVVJVE5LWldLV1VMXFRPTlROWFJPXkNWSllPT1hPVVpOWp08U0pSb1dRW11RXV5TVGNUW1VcSFhYbVNdTV9YblVcZGRYZFJdaWFXf2NaX1dhQV1agWlaYV9cbGRfXl1jWm1fW2tea2hgZWlfcWRkbWdgjl1rQ25ghG9jZGpkbnRfhZ5VcHBjb3Jjam5lamhinHdjfWFvR2lmjWVyRHxoZYpgjXJnkXZpdXZrbGN2R3JrjnNteGxyaVlxrHdsloBqkXtuemxwlnR3P2h6RXlwdn9vdmdxqXdxfItshHt4QXhxlH5zc3dzj4FvmnF1m3R0oXV+RHx2gWl5o4F8QH11mHh4jX96eWJ9sXGDTYN5f4V5eoZ3nH97mHJ+osBsc4Z8gph4f4R/fop9ioGISKx2j46CgoSEmZKCiYqFhIGFoIuEm4yGkY+Eo32JrpOHh4aNoZONjIyXSJeOlKCKppiNrJSZS6+Ne5eSsJyUjoSXvJ2UmrGRhaGRuLCQlpyXlaaam6Ceoo2hxsiSsqSfnqqawaeepKmdvZ6isaifxKuiqKqiu6ejwLChvKqorJysssuewbCowbOpr7qqxbypy7eswLKwtLmtzs6pyrm0s8iwusS10L2418C43r+8wcW42ci338624Mu42sS81bjA1cG+z8PAxMLCzMPC2sXB4MrEw8vD3MzHxdDE5dHF2dXF4cnK1M3Lz9rG6dbJ6tTN2dHN7NrL5tXN5tjN4NPQ1dbQz9TU69vV1NvT7eXS6OPU4tvY3NzY6ufX8uLd2+ja6Ovb9+jd8eLi7evi/Ovk8OXm8Ovm5O/k+Ovp7fLs6/Lr+PHu8+vw8/Hy/PXz9/P18fb59fT5/P339vr4/Pb7/vr8+f/7+v77//z/+/7//P///yH5BAEKAP8ALAAAAAAgABgAAAj+AP0JHEiwoMGDCAnSC2WLW72EEBF+CnBgQxlXDwvmm8cvIsFxKTQ0MICAAQdXBcOxQpZunkd/dzy0OIHAwQQGBVaAE8gv1hU+p5aFkwdRWYcfA1Q0cGBhwQIGXASqq8MDRI06qZJZe3eQXqIgQAQEmLCBw4MHIwD541dsiY0jUmjMWFPq1jeDzPa80QMjQIANLi6MIJHL37xGPFDsiEOIzIccnVwSrBfJjhdRYtBQQPAiBKIV7vxhQ4JDyhg6aqjM+OKsI0FuWeBQ0gUGCqMILsw0meTvXqstNrRIshRHhpFKXAsKOvTG0580Z54MeYHoRehvt05hatMlD5kaV1r+F9SWxdGrS5zmKHoSIwwWUL2FCZv2ixWmPkWmNEpOUNAkPMT4EggeXLDRwyBYrOMPOVEQ0Io45VxzDS+sYOPaQOP88AgkmrhhhR976OAEI5vog481EACwiDjmsMMOOuWkYxApQWRSRRmHwMFIEgfKoY0/6QRzyyrPsDgKLrB4c6FA7RiSQQkKUJDCHlkM0YMqgNzDzzPASLNLkd2wUAgT5OClgw4eULDZASrEYIoSzPgDDy3ANLNKLLOIs0033Szpjz6hWKDDAQhsEMIIMZgxiVqGUTNML9NUgww22Fgjo0HZmOAAAh5w0NkKm9yg4EDznONMM8PEUkstkhkUDxo2BVgwAgYSCIGFLAfxA88xqKACTUTGiFBBAhUQIQc9+7wU0UI+YMCFMcoqG0804NgT7bXYFhQQADs=");}
+#tab-batch {background-image: url("data:image/gif;base64,R0lGODlhIAAYAOf/AC0uLCswKDQ2Myw6NS48NzE8RzU9OSY/WC8+Tiw/Uzw+OzhAPDxAMjZATDZEPzFEWS1FXzxEQDxESjpFUDtGRipIZ0NFQj9HQzpIWTJKYz5JSjdKXz1LRkJKRj1LUT1LXDJUKjVNZyhYJkJMWERMUyZcI0BPX0dPSytbKTlRa0hPVjNaKThaL0NSYi9eLDlbMTxUbkRTY0NVYEFXZjdhNU1YZENbdVFZYFdZVjlpNjxpMFNjQTZuOV1fXEFrPmFkJ2FkRVtjal5mUVNrRzV3LWNlYjd5L2JoXlpsTzZ7N0B5MEV4Nzp8Mk13MT97OEJ7Mk52Qzp+Oj1+ND99QFF3UEJ+Oz6ANkV9R0R/PD+BNz2BPUh+QkKAQ0CCOFt7MEGDOEiBOEaBPml2SE2APkuAREeCP0CEQHRwblF/REmBS3Byb0iDQEuDOmZ3ZUyCRkmEQVt9XEeFSEqFQll/WE6ER3N5TEuGQ0yFTkyHRFCGSm98X3R7ZlKIS1WIRVeIUmOFZGqEZFqLVWiFal2LT3OCal+KW1KQUoKGM16OWFqQU2GPU3SDlWWOWWCQWoKEgWKSXHeGmWmSXXyHlIWHhGaWYGeVa2SYZomLiGyYaIOPnGufbYaSn36ZeHKebYSTppGTkHqeb3igdouWo46WnnGlc4yYpZaYlX+kdH6le3qpfoamfZyem4Kpf3Ouh5iikZWgroKsiIiriIqtiqKkoZaqiqCmnJqms46xjpWwjqeppqKsm5mwlZ6ykoG8lK2vrIq9l566mI++nrq2qLW3tLC7qaTAnqbCoKHDrKbFqLu9urK+zK3Eqbm/wca9tsC/trjAyLDHrMHDv7TMsMTGw8vFxLfOs8bIxbvOusrMyb/SvsLSuMLVwcvWxOLO0MbZxcncyNbY1dDZ4dHdyvjQ3tvd2v3V5N7g3Nbk1+Hj4Nno277x4+no3+Hr5unr6MH48Mr58u/x7tr49e7z9vTy9vD2+PX39PX6/fj69/b8/vv9+f/8+//9//n///z/+/7//AAAACH5BAEKAP8ALAAAAAAgABgAAAj+AP0JHIgvH757+A7is8fwHsOHDAkOlBjO1qtXpUSV8iTK06hMojJtkkRyEaRn9CaqVGbjQIUEGR5kyGACRo0NMDakQLABQYgHECDNUymQ2YwPGExIiKGihowbNWqQkOHBxIgGGAq0mDAiiDyV5DRQuBChrFkDBAY46ODgQocTJzq4vbDAAAd2E6+xAMGCxYsVLnxQoTKnMJw/gAQBouECBQoRJUrw+DZRH5ldzpoRa+LFlRpH03zlKjLs0yVHlrCkaiULViU/RBMJKzeu249DtVb5cmRqlgILl3pM0mRInbt47441GqhP4CNEvGip0pFDF44zyXBQ+zRslTV4pPD+/PoVrJcmSv72TURkhIgRJViwYMIlKxYrVqhO5e8UB4uS9u4hUs9A+RTDBRluIOiGG3EsSEccdOTBRyChYBJIHgkemMcVnAzojzkBDDGIIm/gIYcdKOKBRxdamJGiiWZokcUbb2CxAwDmCGQOA0BgYUcYZazxhhx49PFGFmHQuIYcfTQZxxpWSBEFEAKgI1A7etQxxpFWdAnGGllIwQQWZYQRRhdodhEfFlE4IUYb8AzEDRpLTOHEnXdOoeeBbtzhRySgMOJHGmlsYagf6ahUDBZxQGgHkXKEEV8YJ9rBxyB55GEHjZICQ1Q1Y4LRBRhlsBGlFFZ0gWKleDwqxxuPa0SxDFHbGLFmF2WE2aUVWVQqx6+v0lgGE9cQdY6tWmAhqRRZdNFsiShuCusaZvonDlHs2PoEFk+IyYQUqLJBapClYhElFmskcQ5R90BRyC3AxBtvMcUYYwwyy0AjjTbZbOMNN9cgQQhR/rQjhC4EJzzRPEdEQ/A6e2BDsHoKCwROnBRPVE8+/uBT8ccDBQQAOw==");}
+
+#pages {padding:6px;}
+.page {display:none;}
+.visible {display:block;}
+.header {text-align:center;}
+form {font-family:monospace;}
+.optional-input {color:#006666;}
+.divide {border-top:1px solid black;margin:5px 0px;clear:both;}
+.boring-crap {width:45em;font-size:90%;}
+.output {width:40em;height:20em;}
+.batch-text {width:16em;height:24em;float:left;margin:0 5px 5px 0;font-size:90%;}
+#batch-input {width:16em;}
+#batch-controls {float:left;font-size:85%;}
+.withlab {white-space:nowrap;}
+.clear {clear:both;}
+
+u {margin:1px;color:#008800;}
+</style>
+</head><body>
+
+<div id="pagewrapper">
+ <div id="tabs" onclick="swaptab(event);">
+  <a class="tab selected" id="tab-nes">NES</a>
+  <a class="tab" id="tab-snes">SNES</a>
+  <a class="tab" id="tab-gen">Genesis</a>
+  <a class="tab" id="tab-gggb">GG/GB</a>
+  <a class="tab" id="tab-batch">Batch</a>
+ <br style="clear:both;"/>
+ </div>
+ <div id="pages">
+  <div class="page visible" id="tab-nes-page"><div class="header">Nintendo Entertainment System</div><div class="divide"></div>
+   <form action="javascript:void(0);" id="form-nes">
+    Code:<input id="input-nes-gg" type="text" maxlength="8" size="9" value=""/>
+    <input type="button" value="Decode Game Genie code" onclick="doDecodeForm('nes');"/>
+    <div class="divide"></div>
+    Address:<input id="input-nes-add" type="text" maxlength="4" size="5" value="" title="valid address space is 0x0000-0x7FFF, add 0x8000 for CPU-relative addresses"/>
+    Value:<input id="input-nes-val" type="text" maxlength="2" size="3" value=""/>
+    <span class="optional-input">Key:</span><input id="input-nes-key" type="text" maxlength="2" size="3" value="" title="the key is optional, sometimes called 'compare' or 'check' byte"/>
+    <input type="button" value="Encode raw" onclick="doEncodeForm('nes');"/>
+    <div class="divide"></div>
+    <textarea class="output" id="output-nes"></textarea>
+   </form>
+  </div>
+  <div class="page" id="tab-snes-page"><div class="header">Super Nintendo Entertainment System</div><div class="divide"></div>
+   <form action="javascript:void(0);" id="form-snes">
+    Code:<input id="input-snes-gg" type="text" maxlength="9" size="10" value=""/>
+    <input type="button" value="Decode Game Genie code" onclick="doDecodeForm('snes');"/>
+    <div class="divide"></div>
+    Address:<input id="input-snes-add" type="text" maxlength="6" size="7" value=""/>
+    Value:<input id="input-snes-val" type="text" maxlength="2" size="3" value=""/>
+    <input type="button" value="Encode raw" onclick="doEncodeForm('snes');"/>
+    <div class="divide"></div>
+    <textarea class="output" id="output-snes"></textarea>
+   </form>
+  </div>
+  <div class="page" id="tab-gen-page"><div class="header">Sega Genesis/Mega Drive</div><div class="divide"></div>
+   <form action="javascript:void(0);" id="form-gen">
+    Code:<input id="input-gen-gg" type="text" maxlength="9" size="10" value=""/>
+    <input type="button" value="Decode Game Genie code" onclick="doDecodeForm('gen');"/>
+    <div class="divide"></div>
+    Address:<input id="input-gen-add" type="text" maxlength="6" size="7" value=""/>
+    Value:<input id="input-gen-val" type="text" maxlength="4" size="5" value=""/>
+    <input type="button" value="Encode raw" onclick="doEncodeForm('gen');"/>
+    <div class="divide"></div>
+    <textarea class="output" id="output-gen"></textarea>
+   </form>
+  </div>
+  <div class="page" id="tab-gggb-page"><div class="header">Sega Game Gear and Nintendo Game Boy</div><div class="divide"></div>
+   <form action="javascript:void(0);" id="form-gggb">
+    Code:<input id="input-gggb-gg" type="text" maxlength="11" size="12" value=""/>
+    <input type="button" value="Decode Game Genie code" onclick="doDecodeForm('gggb');"/>
+    <div class="divide"></div>
+    Address:<input id="input-gggb-add" type="text" maxlength="4" size="5" value="" title="Note: Game Boy address range: 0000-7FFF. Game Gear address range:0000-BFFF."/>
+    Value:<input id="input-gggb-val" type="text" maxlength="2" size="3" value=""/>
+    <span class="optional-input">Key:</span><input id="input-gggb-key" type="text" maxlength="2" size="3" value="" title="the key is optional, sometimes called 'compare' or 'check' byte"/>
+    <input type="button" value="Encode raw" onclick="doEncodeForm('gggb');"/>
+    <div class="divide"></div>
+    <textarea class="output" id="output-gggb"></textarea>
+   </form>
+  </div>
+  <div class="page" id="tab-batch-page"><div class="header">Batch Encoder/Decoder thingy</div><div class="divide"></div>
+   <div class="boring-crap">This form attempts to find valid game genie code or lines beginning with patch sequences in the first box, and transforms them to their counterpart in the second box. Game Genie codes must be uppercase, but multiple ones can be on the same line. Raw codes must be: 0000[00] 00[00] [00] (space or colon delimited).</div>
+   <div class="divide"></div>
+   <form action="javascript:void(0);" id="form-batch">
+    <textarea class="batch-text" id="batch-input" title="input, paste gobs of text here"></textarea>
+    <textarea class="batch-text" id="batch-output" title="output only, just copy from here"></textarea>
+    <div id="batch-controls">
+     System:<br/>
+     <span class="withlab"><input type="radio" checked="checked" name="system" value="nes" id="radio-nes"/><label for="radio-nes">Nintendo</label></span><br/>
+     <span class="withlab"><input type="radio" name="system" value="snes" id="radio-snes"/><label for="radio-snes">Super Nintendo</label></span><br/>
+     <span class="withlab"><input type="radio" name="system" value="gen" id="radio-gen"/><label for="radio-gen">Sega Genesis</label></span><br/>
+     <span class="withlab"><input type="radio" name="system" value="gggb" id="radio-gggb"/><label for="radio-gggb">Game Boy/Game Gear</label></span><br/>
+     <div class="divide"></div>
+     Action:<br/>
+     <span class="withlab" title="Decode from Game Genie codes to raw address/values"><input type="radio" checked="checked" name="action" value="decode" id="radio-decode"/><label for="radio-decode">Decode</label></span>
+     <span class="withlab" title="Encode raw address/values to Game Genie codes"><input type="radio" name="action" value="encode" id="radio-encode"/><label for="radio-encode">Encode</label></span>
+     <div class="divide"></div>
+     Keep:<br/>
+     <span class="withlab" title="Keep non-matching text that may appear after valid codes (only on the same lines)"><input type="checkbox" id="checkbox-comments"/><label for="checkbox-comments">comments</label></span><br/>
+     <span class="withlab" title="Keep non-matching text that may appear on lines without codes"><input type="checkbox" id="checkbox-text"/><label for="checkbox-text">other text</label></span><br/>
+     <span class="withlab" title="Include the pre-transform input in the output (useful for seeing what was matched, the input will be in brackets)"><input type="checkbox" checked="checked" id="checkbox-counterparts"/><label for="checkbox-counterparts">counterparts</label></span>
+     <div class="divide"></div>
+     <input type="button" value="Start conversion" onclick="doBatchForm()"/>
+    </div>
+   </form>
+  </div>
+ </div>
+</div>
+
+<br class="clear"/>
+<div id="notes"><ul>
+<li>Some emulators use odd formatting for codes. FCE for example is [S][C][A+8000]AAA:VV[:KK], Nesticle is AAAA[?CC]:KK, etc. Note that NES address space is 15 bits, in a ROM file this is 0000-7FFF (switched with mappers), in the NES CPU architecture this is 8000-FFFF. Any raw code outside this range can be converted by adding or subtracting 0x8000.</li>
+<li>The NES encoder can NOT write outside of ROM address space (15 bits), as it is a limitation of proper code formatting. For emulators that can write to RAM, it is better to distribute such codes in Action Replay/Game Shark/raw formats rather than malformed Game Genie codes. Some malformed codes apparently did work on the Game Genie hardware, but these have direct analogs to proper codes (the ignored high address bit is simply fixed).</li>
+<li>The Game Gear/Game Boy encoder can indicate an address outside of ROM address space. This won't work for the hardware, but as this may work for some emulators, and as proper code formatting supports it, and as the Game Gear and Game Boy have different ROM address space (0000-7FFF for Game Boy, 0000-BFFF for Game Gear), this functionality is intact.</li>
+</ul></div>
+
+<script type="text/javascript">loadtab();</script>
+</body></html>

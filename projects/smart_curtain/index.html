@@ -1,0 +1,180 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+<title>
+Ben Boldt - Smart Curtain
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3"> Smart Curtain </font></center><br><br><br>
+
+Shapeshifter (code name "Smart Curtain") is a featured exhibit in Sensor Zone at The Works in Bloomington, MN.  I created this page and added to it as I was in the process of developing the exhibit.<br><br><hr><br><br>
+
+Shapeshifter, codename "Smart Curtain" is a prototype that I am working on for The Works.  Due to a bug in my FTP program, I have lost the initial documentation of the project.  I did not have a backup of this page.<br>
+<br>
+Here are the previous pictures from this page:<br>
+<br>
+<center><img src="./smart_curtain/java_version.gif"><br>
+Original Java Version<br>
+<br>
+<img src="./smart_curtain/gtk_version.gif"><br>
+Rewritten using GTK+<br>
+<br>
+<img src="./smart_curtain/breadboard.jpg"><br>
+Prototype Circuits and USB HID Microcontroller<br>
+<br>
+<img src="./smart_curtain/temp_amp_circuit.png"><br>
+Temperature Amplifier Circuit in PSpice<br>
+<br>
+<img src="./smart_curtain/temp_amp_graph.png"><br>
+Temperature Amplifier Circuit Characteristic<br>
+</center>
+
+<br><br><hr><br>
+
+2/2/13<br>
+<br>
+Today I completed the microphone circuit.  This circuit quickly snaps to an amplitude greater than its current output, then trails off.<br>
+<br>
+<center><img src="./smart_curtain/mic_circuit.png"></center>
+
+<br><br><hr><br>
+
+2/4/13<br>
+<br>
+Do I see the beginnings of a RadioShack board that gets its power and natively communicates through USB?  I think I do.  :D<br>
+<br>
+<center><img src="./smart_curtain/radio_shack.jpg"></center>
+
+<br><br><hr><br>
+
+2/7/13<br>
+<br>
+Better than a potentiometer is this trademark shaped quadrature-encoder-to-be.  For this to work, I need 2 optical sensors spaced apart by 1.5&times; the distance between teeth.  I have red lasers and photodiodes that I will try to use.  My senior design project used an encoder similar to this, and from that I know that Schmitt Triggers will be required.  The 18F2550 has some Schmitt Trigger inputs on Port C.<br>
+<br>
+<center><img src="./smart_curtain/quadrature_gear.jpg"></center><br>
+<br>
+OH CRAP I always think the logo has 11 teeth and in fact it has 9.
+
+<br><br><hr><br>
+
+2/9/13<br>
+<br>
+Now it has 9 teeth and a hole in the middle.  These lazy susan bearings are only designed to work when they are level with the ground, so that is an issue.<br>
+<br>
+<center><img src="./smart_curtain/quadrature_gear_9.jpg"></center><br>
+
+<br><br><hr><br>
+
+2/10/13<br>
+<br>
+I chopped the shape out of plywood with a jigsaw, and the blade only flew out of that piece of crap 3 times.  But it did the job well enough for a prototype.  Seen here is one of the laser / photodiode sensors.  The laser is shooting down from above and lighting up the photodiode.  There will be 4 of these, which equates out to 1 step per 10 degrees with 9 teeth, or 36 steps per revolution.<br>
+<br>
+Though they are not really designed for it, the lazy susan bearings seem to be working fine when I turn this thing up in its side.  The top of the bearings has metal on metal when configured this way.  Though it will not last as long on its side, it seems like it could last a good long while like this.<br>
+<br>
+<center><img src="./smart_curtain/wood_gear_1.jpg"></center><br>
+
+<br><br><hr><br>
+
+2/11/13<br>
+<br>
+There are now 4 lasers and photodiodes mocked up on this prototype.  Next I need to hook this up to a microcontroller.  The distance between sensors is (n &times; 40&deg;) + 5&deg;, where n is an integer.  This version uses 45&deg; spacing.  It is possible to squish them all together with 5&deg; spacing, to use use 90&deg; spacing, or a combination.<br>
+<br>
+<center><img src="./smart_curtain/wood_gear_4.jpg"></center><br>
+
+<br><br><hr><br>
+
+2/13/13<br>
+<br>
+I have a decoder rigged up.  It keeps count and clamps between 0 and 1023, which corresponds to the 10-bit analog readings from the other sensors.  I have to spin it around kind of a lot of times to go all the way from 0 to 1023, so I may have to reduce the range to 512 or 256 or so and multiply it.<br>
+<br>
+The display is for diagnostic purposes - it's not necessarily a keeper.  With the display, I have 1 extra pin on the microcontroller which, with a bit of luck, can be used as a PWM.  Ultimately, this little chip should put out an analog value via PWM and a low-pass filter so that the connector on this thing will be compatible with the other sensors.  This this will allow us to physically swap which sensor does what on the screen, and it will also allow us to easily retrofit a switch-based sensor swapper accessible to visitors.  It may be silly to go from digital to analog and back to digital, but in this case the benefits outweigh the consequences.  This is a PIC16F628A chip, and I am using its internal oscillator.<br>
+<br>
+I need to either turn down the brightness or not use lasers.  These things are way too bright to look at.<br>
+<br>
+<center><img src="./smart_curtain/decoder.jpg"></center><br>
+
+<br><br><hr><br>
+
+2/14/13<br>
+<br>
+I have replaced the red lasers with blue LEDs.  This is perfectly safe to play with now.  Also, the cardboard brackets always needed to be adjusted so I replaced those with these metal things, and they are working a lot better.<br>
+<br>
+<center><img src="./smart_curtain/blue_leds.jpg"></center><br>
+
+<br><br><hr><br>
+
+2/16/13<br>
+<br>
+Here is a picture of the PC booting:<br>
+<br>
+<center><img src="./smart_curtain/booting.jpg"></center><br>
+<br>
+Here is a picture of the PC running the smart curtain program:<br>
+<br>
+<center><img src="./smart_curtain/running.jpg"></center><br>
+<br>
+On the table, you may notice the rotary sensor thing.  This sensor is NOT hooked up to the graphics at this point.  You may also notice that the orange board is from my Robotix dinosaur that ate ball bearings and blew bubbles.
+
+<br><br><hr><br>
+
+2/17/13<br>
+<br>
+The microphone board is DONE now.  I added a trim pot to adjust the minimum sound level.  This allows us to chop off all sound below a certain volume.  The 2-pin connector goes to the microphone and the 3-pin connector goes to the USB controller board.<br>
+<br>
+<center><img src="./smart_curtain/microphone_board.jpg"></center><br>
+<br>
+I also put together the RadioShack board for this one.  I have not tested it yet, but that should be about it.  I'm waiting for some single-row pin headers to come in.  When those are here, I will add an ICSP header to this board right above the crystal.  This will allow me to reprogram the microcontroller without removing it.<br>
+<br>
+<center><img src="./smart_curtain/radio_shack_2.jpg"></center><br>
+
+<br><br><hr><br>
+
+2/18/13<br>
+<br>
+The photoresistor board is done now.  The trim pot scales the output, so we can match its range to our light source.<br>
+<br>
+<center><img src="./smart_curtain/photoresistor.jpg"></center><br>
+
+<br><br><hr><br>
+
+2/19/13<br>
+<br>
+After actually testing the photoresistor board, the output was inverted.  I made so many mistakes that I made an inverting amplifier instead of a non-inverting amplifier.  Also, I did not even hook up the ground rail - I don't know how it worked the way it did.  I have it fixed and tested now.<br>
+
+<br><br><hr><br>
+
+2/23/13<br>
+<br>
+Okay, all of the little sensor boards are done now.  The purpose of these boards is to be close to the sensor to reduce noise, and then amplify so that the signal can travel a long distance to the USB HID board.  All of these circuits are designed to output a signal in the range of 0 - 3.6V so they are interchangeable.  All of these boards have trim pots so that the can be easily adjusted after they are installed.<br>
+<br>
+<center><img src="./smart_curtain/sensor_boards.jpg"></center><br>
+
+<br><br><hr><br>
+
+3/11/13<br>
+<br>
+The rotary encoder should be compatible with the USB HID board now.  I'm still using a PIC16F628A to read the encoder.  Now its PWM and a low pass filter put out an analog signal in the range 0 - 3.6V.  The filter is a 10k&ohm; resistor and 1&mu;F cap.  I don't have the crimp connectors here so I just soldered the wires right in for now.  I will switch these to the right connectors when I bring it in to The Works.  Also, I changed the 100k&ohm; pull-up resistors on the photodiodes to 220k&ohm;.  This seems to be a good balance between ignoring ambient light and reacting to the blue LED.  I have the encoder set to turn around about 5 times to go from min to max.  This seemed like a good value that could be scaled easily with a shifting operation in the microcontroller.  As fast as I can spin the encoder, the micro keeps up.  We can be more precise if we want, but this should do okay for now.  The micro is still putting out the data for the 4 7-segment displays even though they are not hooked up.  With the displays (7 segments + 4 mux), 4 photodiodes, and 1 PWM, that accounts for every last pin on this chip!<br>
+<br>
+<center><img src="./smart_curtain/16f628a.jpg"></center><br>
+
+<br><br><hr><br>
+
+4/11/13<br>
+<br>
+I changed the computer to run on Lubuntu instead of CentOS to fix the screensaver problem.  Nothing that I found could prevent the screen from going black after a few minutes so I went to a whole new OS.  It was completely painless - I didn't have to install any libraries or anything.  In Lubuntu, I am able to turn off the screen saver.  The motion is not quite as smooth when there are a lot of shapes on the screen now.  This could be fixed by weeding out unnecessary processes in the OS and/or using a faster computer.  The exhibit opens to the public on 4/19/13.
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

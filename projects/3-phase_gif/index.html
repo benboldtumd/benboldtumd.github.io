@@ -1,0 +1,406 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+<title>
+Ben Boldt - 3-Phase GIF Background
+</title>
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; color: #683821}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; min-height: 14.0px}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; color: #760f50}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco}
+    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; color: #236e25}
+    p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; color: #891315}
+    span.s1 {color: #000000}
+    span.s2 {color: #760f50}
+    span.s3 {color: #0000ff}
+    span.s4 {color: #891315}
+    span.Apple-tab-span {white-space:pre}
+  </style>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">3-Phase GIF Background</font></center><br><br><br>
+
+I thought I'd share how I made the background on this page.  It moves so smoothly that you can barely tell that it's moving!  I did this by anti-aliasing on 16 levels of sub-pixel position.  Each line's x position is on a sine function, each 120&deg; of phase from each other.  This is a 16-color animated GIF with custom color table.  Here's the code I wrote:<br><br>
+
+<center><table border="1" bgcolor="#FFFFFF" cellspacing=0 cellpadding=10><tr><td>
+<p class="p1">#include &lt;math.h&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">#include &lt;iostream&gt;</p>
+<p class="p1">#include &lt;iomanip&gt;</p>
+<p class="p3">using<span class="s1"> </span>namespace<span class="s1"> std;</span></p>
+<p class="p2"><br></p>
+<p class="p1">#define FRAMES 240.0</p>
+<p class="p1">#define AMPLITUDE 8.0<span class="Apple-tab-span">	</span>// &lt;-- Half of peak to peak</p>
+<p class="p1">#define DC_OFFSET (AMPLITUDE)</p>
+<p class="p1">#define WIDTH (AMPLITUDE * 2)</p>
+<p class="p2"><br></p>
+<p class="p4"><span class="s2">void</span> draw_segment(<span class="s2">double</span> x)</p>
+<p class="p4">{</p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// This function is hard-coded to work only with 4-bit color.</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">int</span> count;</p>
+<p class="p4"><span class="Apple-tab-span">	</span>count = <span class="s3">0</span>;</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// These are the white pixels before the bar, if any.</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">while</span>(x &gt;= WIDTH)</p>
+<p class="p4"><span class="Apple-tab-span">	</span>{</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>cout &lt;&lt; <span class="s4">"0"</span>;</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>count++;</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>x -= WIDTH;</p>
+<p class="p4"><span class="Apple-tab-span">	</span>}</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// This is the the gray pixel between the white pixels and the beginning of the bar.</p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// This pixel produces 16 levels of sub-pixel position.</p>
+<p class="p4"><span class="Apple-tab-span">	</span>cout &lt;&lt; hex &lt;&lt; (<span class="s2">int</span>)(<span class="s3">0xF</span> - x);</p>
+<p class="p4"><span class="Apple-tab-span">	</span>count++;</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// These are the solid pixels of the bar.</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">for</span>(<span class="s2">int</span> i = <span class="s3">0</span>; i &lt; <span class="s3">7</span>; i++)</p>
+<p class="p4"><span class="Apple-tab-span">	</span>{</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>cout &lt;&lt; <span class="s4">"f"</span>;</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>count++;</p>
+<p class="p4"><span class="Apple-tab-span">	</span>}</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// This is the the gray pixel between the end of the bar and the white pixels after it.</p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// This pixel produces 16 levels of sub-pixel position.</p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// It is complementary of the other gray pixel.</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">if</span>(count &lt; WIDTH) cout &lt;&lt; hex &lt;&lt; (<span class="s2">int</span>)x;</p>
+<p class="p4"><span class="Apple-tab-span">	</span>count++;</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// These are the white pixels after the bar, if any.</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">for</span>(<span class="s2">int</span> i = count; i &lt; WIDTH; i++)</p>
+<p class="p4"><span class="Apple-tab-span">	</span>{</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>cout &lt;&lt; <span class="s4">"0"</span>;</p>
+<p class="p4"><span class="Apple-tab-span">	</span>}<span class="Apple-tab-span">	</span></p>
+<p class="p4">}</p>
+<p class="p2"><br></p>
+<p class="p4"><span class="s2">int</span> main(<span class="s2">void</span>)</p>
+<p class="p4">{</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">double</span> x, y, z;</p>
+<p class="p6"><span class="s1"><span class="Apple-tab-span">	</span>cout &lt;&lt; </span>"4-bit Image Data:\n"<span class="s1">;</span></p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">for</span>(<span class="s2">double</span> i = <span class="s3">0.0</span>; i &lt; FRAMES; i++)</p>
+<p class="p4"><span class="Apple-tab-span">	</span>{</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>x = round(<span class="s3">8</span> * (AMPLITUDE * cos( ((<span class="s3">2.0</span> * M_PI) * (i / FRAMES)) - (<span class="s3">2.0</span> * M_PI * <span class="s3">0.0</span> / <span class="s3">3.0</span>) ) + DC_OFFSET));</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>y = round(<span class="s3">8</span> * (AMPLITUDE * cos( ((<span class="s3">2.0</span> * M_PI) * (i / FRAMES)) - (<span class="s3">2.0</span> * M_PI * <span class="s3">1.0</span> / <span class="s3">3.0</span>) ) + DC_OFFSET));</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>z = round(<span class="s3">8</span> * (AMPLITUDE * cos( ((<span class="s3">2.0</span> * M_PI) * (i / FRAMES)) - (<span class="s3">2.0</span> * M_PI * <span class="s3">2.0</span> / <span class="s3">3.0</span>) ) + DC_OFFSET));</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>draw_segment(x);</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>draw_segment(y);</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>draw_segment(z);</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>cout &lt;&lt; <span class="s4">"\n"</span>;</p>
+<p class="p4"><span class="Apple-tab-span">	</span>}</p>
+<p class="p2"><br></p>
+<p class="p5"><span class="s1"><span class="Apple-tab-span">	</span></span>// Spit out 4-bit color table</p>
+<p class="p6"><span class="s1"><span class="Apple-tab-span">	</span>cout &lt;&lt; </span>"\n24-bit Color Look-Up Table (16 color entries):\n"<span class="s1">;</span></p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">unsigned</span> <span class="s2">int</span> color_val;</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">for</span>(<span class="s2">double</span> i = <span class="s3">0</span>; i &lt; <span class="s3">16.0</span>; i++)</p>
+<p class="p4"><span class="Apple-tab-span">	</span>{</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>color_val = <span class="s3">0xFF</span> - round(((<span class="s3">255.0</span> - <span class="s3">234.0</span>) * i) / <span class="s3">15.0</span>);</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s2">for</span>(<span class="s2">int</span> j = <span class="s3">0</span>; j &lt; <span class="s3">3</span>; j++) cout &lt;&lt; hex &lt;&lt; (<span class="s2">int</span>)color_val;</p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>cout &lt;&lt; endl;</p>
+<p class="p4"><span class="Apple-tab-span">	</span>}</p>
+<p class="p2"><br></p>
+<p class="p4"><span class="Apple-tab-span">	</span><span class="s2">return</span> <span class="s3">0</span>;</p>
+<p class="p4">}</p>
+</td></tr></table></center><br><br>
+
+This produces the following output:<br><br>
+<center><table border="1" bgcolor="#FFFFFF" cellspacing=0 cellpadding=10><tr><td><font face="courier" size="-1"><b>
+4-bit Image Data:<br>
+00000000ffffffff00ffffffff00000000ffffffff000000<br>
+00000000ffffffff00efffffff10000000ffffffff000000<br>
+00000000ffffffff00cfffffff30000002fffffffd000000<br>
+00000000ffffffff00bfffffff40000003fffffffc000000<br>
+00000000ffffffff009fffffff60000005fffffffa000000<br>
+00000000ffffffff007fffffff80000006fffffff9000000<br>
+00000000ffffffff006fffffff90000007fffffff8000000<br>
+00000000ffffffff004fffffffb0000009fffffff6000000<br>
+00000000ffffffff003fffffffc000000afffffff5000000<br>
+00000001fffffffe001fffffffe000000bfffffff4000000<br>
+00000001fffffffe000ffffffff000000cfffffff3000000<br>
+00000002fffffffd000efffffff100000dfffffff2000000<br>
+00000002fffffffd000cfffffff300000ffffffff0000000<br>
+00000003fffffffc000bfffffff400000ffffffff0000000<br>
+00000003fffffffc0009fffffff600001fffffffe0000000<br>
+00000004fffffffb0007fffffff800002fffffffd0000000<br>
+00000005fffffffa0006fffffff900003fffffffc0000000<br>
+00000005fffffffa0004fffffffb00004fffffffb0000000<br>
+00000006fffffff90002fffffffd00005fffffffa0000000<br>
+00000007fffffff80001fffffffe00006fffffff90000000<br>
+00000008fffffff70000ffffffff00006fffffff90000000<br>
+00000008fffffff70000dfffffff20007fffffff80000000<br>
+00000009fffffff60000cfffffff30008fffffff70000000<br>
+0000000afffffff50000afffffff50009fffffff60000000<br>
+0000000bfffffff400008fffffff70009fffffff60000000<br>
+0000000cfffffff300007fffffff8000afffffff50000000<br>
+0000000dfffffff200005fffffffa000bfffffff40000000<br>
+0000000efffffff100003fffffffc000bfffffff40000000<br>
+0000000ffffffff000002fffffffd000cfffffff30000000<br>
+0000001fffffffe000000ffffffff000cfffffff30000000<br>
+0000002fffffffd000000efffffff100dfffffff20000000<br>
+0000003fffffffc000000dfffffff200dfffffff20000000<br>
+0000004fffffffb000000bfffffff400efffffff10000000<br>
+0000005fffffffa000000afffffff500efffffff10000000<br>
+0000007fffffff80000008fffffff700efffffff10000000<br>
+0000008fffffff70000007fffffff800efffffff10000000<br>
+0000009fffffff60000005fffffffa00ffffffff00000000<br>
+000000bfffffff40000003fffffffc00ffffffff00000000<br>
+000000cfffffff30000002fffffffd00ffffffff00000000<br>
+000000efffffff10000000ffffffff00ffffffff00000000<br>
+000000ffffffff00000000ffffffff00ffffffff00000000<br>
+000000ffffffff00000000efffffff10ffffffff00000000<br>
+000002fffffffd00000000cfffffff30ffffffff00000000<br>
+000003fffffffc00000000bfffffff40ffffffff00000000<br>
+000005fffffffa000000009fffffff60ffffffff00000000<br>
+000007fffffff8000000008fffffff70efffffff10000000<br>
+000008fffffff7000000007fffffff80efffffff10000000<br>
+00000afffffff5000000005fffffffa0efffffff10000000<br>
+00000bfffffff4000000004fffffffb0efffffff10000000<br>
+00000dfffffff2000000003fffffffc0dfffffff20000000<br>
+00000efffffff1000000002fffffffd0dfffffff20000000<br>
+00000ffffffff0000000001fffffffe0cfffffff30000000<br>
+00002fffffffd0000000000ffffffff0cfffffff30000000<br>
+00003fffffffc0000000000efffffff1bfffffff40000000<br>
+00005fffffffa0000000000dfffffff2bfffffff40000000<br>
+00007fffffff80000000000cfffffff3afffffff50000000<br>
+00008fffffff70000000000bfffffff49fffffff60000000<br>
+0000afffffff50000000000afffffff59fffffff60000000<br>
+0000cfffffff300000000009fffffff68fffffff70000000<br>
+0000dfffffff200000000008fffffff77fffffff80000000<br>
+0000ffffffff000000000008fffffff76fffffff90000000<br>
+0001fffffffe000000000007fffffff86fffffff90000000<br>
+0002fffffffd000000000006fffffff95fffffffa0000000<br>
+0004fffffffb000000000005fffffffa4fffffffb0000000<br>
+0006fffffff9000000000005fffffffa3fffffffc0000000<br>
+0007fffffff8000000000004fffffffb2fffffffd0000000<br>
+0009fffffff6000000000003fffffffc1fffffffe0000000<br>
+000bfffffff4000000000003fffffffc0ffffffff0000000<br>
+000cfffffff3000000000002fffffffd0ffffffff0000000<br>
+000efffffff1000000000002fffffffd0dfffffff2000000<br>
+000ffffffff0000000000001fffffffe0cfffffff3000000<br>
+001fffffffe0000000000001fffffffe0bfffffff4000000<br>
+003fffffffc0000000000000ffffffff0afffffff5000000<br>
+004fffffffb0000000000000ffffffff09fffffff6000000<br>
+006fffffff90000000000000ffffffff07fffffff8000000<br>
+007fffffff80000000000000ffffffff06fffffff9000000<br>
+009fffffff60000000000000ffffffff05fffffffa000000<br>
+00bfffffff40000000000000ffffffff03fffffffc000000<br>
+00cfffffff30000000000000ffffffff02fffffffd000000<br>
+00efffffff10000000000000ffffffff00ffffffff000000<br>
+00ffffffff00000000000000ffffffff00ffffffff000000<br>
+00ffffffff00000000000000ffffffff00efffffff100000<br>
+02fffffffd00000000000000ffffffff00cfffffff300000<br>
+03fffffffc00000000000000ffffffff00bfffffff400000<br>
+05fffffffa00000000000000ffffffff009fffffff600000<br>
+06fffffff900000000000000ffffffff007fffffff800000<br>
+07fffffff800000000000000ffffffff006fffffff900000<br>
+09fffffff600000000000000ffffffff004fffffffb00000<br>
+0afffffff500000000000000ffffffff003fffffffc00000<br>
+0bfffffff400000000000001fffffffe001fffffffe00000<br>
+0cfffffff300000000000001fffffffe000ffffffff00000<br>
+0dfffffff200000000000002fffffffd000efffffff10000<br>
+0ffffffff000000000000002fffffffd000cfffffff30000<br>
+0ffffffff000000000000003fffffffc000bfffffff40000<br>
+1fffffffe000000000000003fffffffc0009fffffff60000<br>
+2fffffffd000000000000004fffffffb0007fffffff80000<br>
+3fffffffc000000000000005fffffffa0006fffffff90000<br>
+4fffffffb000000000000005fffffffa0004fffffffb0000<br>
+5fffffffa000000000000006fffffff90002fffffffd0000<br>
+6fffffff9000000000000007fffffff80001fffffffe0000<br>
+6fffffff9000000000000008fffffff70000ffffffff0000<br>
+7fffffff8000000000000008fffffff70000dfffffff2000<br>
+8fffffff7000000000000009fffffff60000cfffffff3000<br>
+9fffffff600000000000000afffffff50000afffffff5000<br>
+9fffffff600000000000000bfffffff400008fffffff7000<br>
+afffffff500000000000000cfffffff300007fffffff8000<br>
+bfffffff400000000000000dfffffff200005fffffffa000<br>
+bfffffff400000000000000efffffff100003fffffffc000<br>
+cfffffff300000000000000ffffffff000002fffffffd000<br>
+cfffffff300000000000001fffffffe000000ffffffff000<br>
+dfffffff200000000000002fffffffd000000efffffff100<br>
+dfffffff200000000000003fffffffc000000dfffffff200<br>
+efffffff100000000000004fffffffb000000bfffffff400<br>
+efffffff100000000000005fffffffa000000afffffff500<br>
+efffffff100000000000007fffffff80000008fffffff700<br>
+efffffff100000000000008fffffff70000007fffffff800<br>
+ffffffff000000000000009fffffff60000005fffffffa00<br>
+ffffffff00000000000000bfffffff40000003fffffffc00<br>
+ffffffff00000000000000cfffffff30000002fffffffd00<br>
+ffffffff00000000000000efffffff10000000ffffffff00<br>
+ffffffff00000000000000ffffffff00000000ffffffff00<br>
+ffffffff00000000000000ffffffff00000000efffffff10<br>
+ffffffff00000000000002fffffffd00000000cfffffff30<br>
+ffffffff00000000000003fffffffc00000000bfffffff40<br>
+ffffffff00000000000005fffffffa000000009fffffff60<br>
+efffffff10000000000007fffffff8000000008fffffff70<br>
+efffffff10000000000008fffffff7000000007fffffff80<br>
+efffffff1000000000000afffffff5000000005fffffffa0<br>
+efffffff1000000000000bfffffff4000000004fffffffb0<br>
+dfffffff2000000000000dfffffff2000000003fffffffc0<br>
+dfffffff2000000000000efffffff1000000002fffffffd0<br>
+cfffffff3000000000000ffffffff0000000001fffffffe0<br>
+cfffffff3000000000002fffffffd0000000000ffffffff0<br>
+bfffffff4000000000003fffffffc0000000000efffffff1<br>
+bfffffff4000000000005fffffffa0000000000dfffffff2<br>
+afffffff5000000000007fffffff80000000000cfffffff3<br>
+9fffffff6000000000008fffffff70000000000bfffffff4<br>
+9fffffff600000000000afffffff50000000000afffffff5<br>
+8fffffff700000000000cfffffff300000000009fffffff6<br>
+7fffffff800000000000dfffffff200000000008fffffff7<br>
+6fffffff900000000000ffffffff000000000008fffffff7<br>
+6fffffff900000000001fffffffe000000000007fffffff8<br>
+5fffffffa00000000002fffffffd000000000006fffffff9<br>
+4fffffffb00000000004fffffffb000000000005fffffffa<br>
+3fffffffc00000000006fffffff9000000000005fffffffa<br>
+2fffffffd00000000007fffffff8000000000004fffffffb<br>
+1fffffffe00000000009fffffff6000000000003fffffffc<br>
+0ffffffff0000000000bfffffff4000000000003fffffffc<br>
+0ffffffff0000000000cfffffff3000000000002fffffffd<br>
+0dfffffff2000000000efffffff1000000000002fffffffd<br>
+0cfffffff3000000000ffffffff0000000000001fffffffe<br>
+0bfffffff4000000001fffffffe0000000000001fffffffe<br>
+0afffffff5000000003fffffffc0000000000000ffffffff<br>
+09fffffff6000000004fffffffb0000000000000ffffffff<br>
+07fffffff8000000006fffffff90000000000000ffffffff<br>
+06fffffff9000000007fffffff80000000000000ffffffff<br>
+05fffffffa000000009fffffff60000000000000ffffffff<br>
+03fffffffc00000000bfffffff40000000000000ffffffff<br>
+02fffffffd00000000cfffffff30000000000000ffffffff<br>
+00ffffffff00000000efffffff10000000000000ffffffff<br>
+00ffffffff00000000ffffffff00000000000000ffffffff<br>
+00efffffff10000000ffffffff00000000000000ffffffff<br>
+00cfffffff30000002fffffffd00000000000000ffffffff<br>
+00bfffffff40000003fffffffc00000000000000ffffffff<br>
+009fffffff60000005fffffffa00000000000000ffffffff<br>
+007fffffff80000006fffffff900000000000000ffffffff<br>
+006fffffff90000007fffffff800000000000000ffffffff<br>
+004fffffffb0000009fffffff600000000000000ffffffff<br>
+003fffffffc000000afffffff500000000000000ffffffff<br>
+001fffffffe000000bfffffff400000000000001fffffffe<br>
+000ffffffff000000cfffffff300000000000001fffffffe<br>
+000efffffff100000dfffffff200000000000002fffffffd<br>
+000cfffffff300000ffffffff000000000000002fffffffd<br>
+000bfffffff400000ffffffff000000000000003fffffffc<br>
+0009fffffff600001fffffffe000000000000003fffffffc<br>
+0007fffffff800002fffffffd000000000000004fffffffb<br>
+0006fffffff900003fffffffc000000000000005fffffffa<br>
+0004fffffffb00004fffffffb000000000000005fffffffa<br>
+0002fffffffd00005fffffffa000000000000006fffffff9<br>
+0001fffffffe00006fffffff9000000000000007fffffff8<br>
+0000ffffffff00006fffffff9000000000000008fffffff7<br>
+0000dfffffff20007fffffff8000000000000008fffffff7<br>
+0000cfffffff30008fffffff7000000000000009fffffff6<br>
+0000afffffff50009fffffff600000000000000afffffff5<br>
+00008fffffff70009fffffff600000000000000bfffffff4<br>
+00007fffffff8000afffffff500000000000000cfffffff3<br>
+00005fffffffa000bfffffff400000000000000dfffffff2<br>
+00003fffffffc000bfffffff400000000000000efffffff1<br>
+00002fffffffd000cfffffff300000000000000ffffffff0<br>
+00000ffffffff000cfffffff300000000000001fffffffe0<br>
+00000efffffff100dfffffff200000000000002fffffffd0<br>
+00000dfffffff200dfffffff200000000000003fffffffc0<br>
+00000bfffffff400efffffff100000000000004fffffffb0<br>
+00000afffffff500efffffff100000000000005fffffffa0<br>
+000008fffffff700efffffff100000000000007fffffff80<br>
+000007fffffff800efffffff100000000000008fffffff70<br>
+000005fffffffa00ffffffff000000000000009fffffff60<br>
+000003fffffffc00ffffffff00000000000000bfffffff40<br>
+000002fffffffd00ffffffff00000000000000cfffffff30<br>
+000000ffffffff00ffffffff00000000000000efffffff10<br>
+000000ffffffff00ffffffff00000000000000ffffffff00<br>
+000000efffffff10ffffffff00000000000000ffffffff00<br>
+000000cfffffff30ffffffff00000000000002fffffffd00<br>
+000000bfffffff40ffffffff00000000000003fffffffc00<br>
+0000009fffffff60ffffffff00000000000005fffffffa00<br>
+0000008fffffff70efffffff10000000000007fffffff800<br>
+0000007fffffff80efffffff10000000000008fffffff700<br>
+0000005fffffffa0efffffff1000000000000afffffff500<br>
+0000004fffffffb0efffffff1000000000000bfffffff400<br>
+0000003fffffffc0dfffffff2000000000000dfffffff200<br>
+0000002fffffffd0dfffffff2000000000000efffffff100<br>
+0000001fffffffe0cfffffff3000000000000ffffffff000<br>
+0000000ffffffff0cfffffff3000000000002fffffffd000<br>
+0000000efffffff1bfffffff4000000000003fffffffc000<br>
+0000000dfffffff2bfffffff4000000000005fffffffa000<br>
+0000000cfffffff3afffffff5000000000007fffffff8000<br>
+0000000bfffffff49fffffff6000000000008fffffff7000<br>
+0000000afffffff59fffffff600000000000afffffff5000<br>
+00000009fffffff68fffffff700000000000cfffffff3000<br>
+00000008fffffff77fffffff800000000000dfffffff2000<br>
+00000008fffffff76fffffff900000000000ffffffff0000<br>
+00000007fffffff86fffffff900000000001fffffffe0000<br>
+00000006fffffff95fffffffa00000000002fffffffd0000<br>
+00000005fffffffa4fffffffb00000000004fffffffb0000<br>
+00000005fffffffa3fffffffc00000000006fffffff90000<br>
+00000004fffffffb2fffffffd00000000007fffffff80000<br>
+00000003fffffffc1fffffffe00000000009fffffff60000<br>
+00000003fffffffc0ffffffff0000000000bfffffff40000<br>
+00000002fffffffd0ffffffff0000000000cfffffff30000<br>
+00000002fffffffd0dfffffff2000000000efffffff10000<br>
+00000001fffffffe0cfffffff3000000000ffffffff00000<br>
+00000001fffffffe0bfffffff4000000001fffffffe00000<br>
+00000000ffffffff0afffffff5000000003fffffffc00000<br>
+00000000ffffffff09fffffff6000000004fffffffb00000<br>
+00000000ffffffff07fffffff8000000006fffffff900000<br>
+00000000ffffffff06fffffff9000000007fffffff800000<br>
+00000000ffffffff05fffffffa000000009fffffff600000<br>
+00000000ffffffff03fffffffc00000000bfffffff400000<br>
+00000000ffffffff02fffffffd00000000cfffffff300000<br>
+00000000ffffffff00ffffffff00000000efffffff100000<br>
+<br>
+24-bit Color Look-Up Table (16 color entries):<br>
+ffffff<br>
+fefefe<br>
+fcfcfc<br>
+fbfbfb<br>
+f9f9f9<br>
+f8f8f8<br>
+f7f7f7<br>
+f5f5f5<br>
+f4f4f4<br>
+f2f2f2<br>
+f1f1f1<br>
+f0f0f0<br>
+eeeeee<br>
+ededed<br>
+ebebeb<br>
+eaeaea<br>
+
+</b></font></td></tr></table></center><br><br>
+
+After copy/pasting the image data into a new file in HexEdit, I then saved and opened the file as a raw image in Graphic Converter, specifying 4-bit color, width of 48, height of 1, and import frames until end of file.  This produced a black and white version of the animated bar image.  I then imported the color table in a similar fashion, and this changed the bars to the gray color that I was used to.<br><br>
+
+I then just saved it, opened it up in Adobe ImageReady, tweaked timing and looping, and did an optimized save.  That's it.  Here are the frames stacked up on the left and a visual on the right:<br><br>
+
+<center><img src="./3-phase_gif/3-phase_stacked_black.gif"><img src="./3-phase_gif/demo.gif"></center><br><br>
+
+<hr><br><br>
+
+Update 7/12/2012:  I adapted this into 2D and used some other trig functions for the background on the <a href="../index.html">home page</a>.<br><br>
+
+<center><img src="../index_images/plaid.gif"><br>
+Old background<br><br><br>
+
+<img src="../index_images/plaid_xy.gif"><br>
+Animated background</center><br><br><br>
+
+Here are the equations that I used to derive line position in terms of pixels at frame n.  For the x equations, I swapped sine and cosine in all functions, and that's what makes it look sort of like it's drawing circles where the lines intersect.<br><br>
+
+<center><img src="./3-phase_gif/trig.gif"></center>
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>
+Ben Boldt - Macintosh Hard Disk 20 Adventures
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">Macintosh HD 20 Adventures</font></center><br><br><br>
+
+The original two models of Macintosh did not come with any means by which to attach a hard drive.  Steve Jobs insisted on not making the Macintosh expandable in any way.  In fact, you couldn't even upgrade the memory.  If you bought the first one, you were stuck with 128kb of RAM, and the second one, 512k.  That's right when he got fired, and when the Mac Plus came out later, it had 1MB of RAM, expandable to 4MB and a SCSI controller built-in.  Until about the time that the iMac came out, Steve <i>was not at Apple!</i>  Not many people realize this.<br><br>
+
+It was apparent almost right away that people wanted to use hard drives with their Macintoshes in the mid 1980s.  So Apple found a way to attach a hard drive to the external floppy drive port of these Macs.  They called it the Macintosh Hard Disk 20 and you could get one brand new for thousands of dollars in 1985.  Floppy disks were 400kb, and this beast was 20Mb.  Not much faster than a floppy but huge nonetheless.  They had to make a whole new file system that supported -- get this -- <i>nested</i> directories.  All sorts of things happened with this drive.  As a matter of fact, if you look at the hard drive icon on Macs all the way until Mac OS X came out, it is a picture of THIS hard drive.  To this day, it is still named after this hard drive, this is Macintosh HD!  It was maybe expensive and faulty and all sorts of bad things, but lots of good things started right in this drive.<br><br>
+
+To convert from floppy bus to hard drive bus, there's a controller board inside of the HD 20.  The controller board has an IWM chip, some floppy bus control logic in the form of various flip flops, and a Z8 processor.  Between the Z8 and the actual hard drive, there is some sort of PGA device which is yet to be figured out.  The hard drive is strange, though.  It is a Rodime device.  Nobody recognizes the standard.  It's a single ribbon that carries signals and power.  There aren't enough signals to be any obvious known standard.<br><br>
+
+Most HD 20s have done their time and not longer function.  In most cases, it is the Rodime that bit the dust.  So bringing these back to life could be done in 2 different ways, emulating the Rodime drive with a microcontroller and flash memory, reusing the controller board, or emulating the entire HD 20 at the floppy bus level.  It is unclear at this point which would be easier.<br><br>
+
+There are several approaches to figuring this thing out:<br><br>
+
+<ul>
+<li>Macintosh</li>
+<ul>
+<li>Disassemble the Macintosh Plus MC68000 ROM, which contains the HD 20 Driver</li>
+<li>Logic analyze the floppy drive bus, which likely contains GCR encoded serial data and all sorts of bizarre checksumming business</li>
+</ul>
+
+<li>HD 20 Controller Board</li>
+<ul>
+<li>Chart out the circuit board connections
+<li>Disassemble the HD 20 Z8 ROM, which converts between the floppy bus and the unknown Rodime bus</li>
+</ul>
+
+<li>Rodime controller</li>
+<ul>
+<li>Logic analyze the Rodime bus</li>
+</ul>
+</ul>
+
+The Rodime drive has a microcontroller, but this microcontroller does not appear to be ROMless like the one on the HD 20 controller board.  This would require dumping form the microcontroller and that only works if it's not protected.  Even though I scored this drive as defective for cheap on eBay, it does indeed work and it is one of the few remaining, so I don't plan on tampering with it or decapping the processor any time soon.<br><br>
+
+This is one of those putzy projects, I've been working on it for a while.  I do have an HD 20 Z8 ROM dump and disassembly, and I'm currently working on mapping the HD 20 circuit board connections.  I'm not looking for specific answers right now, I'm gathering clues about how this thing works.<br><br>
+
+More to come soon.  I'll post some circuit board pictures and diagrams/pinouts etc, whatever comes up.<br><br>
+
+<hr><br>
+
+Here is a reproduction of the controller board layout.  Only vias and traces are included.  I did this in Osmond, which is a shareware program that anyone can download.  I had to remove a lot of components to see the traces underneath them!  So this will be a good resource for when I put it all back together.  Several vias were damaged in the process D:<br><br>
+
+<center><img src="./hd20/hd20-board.gif"><br><br>
+
+<a href="./hd20/HD20%20Schematic.osm">Right-click here to download Osmond file</a></center><br><br>
+
+Here is the bus multiplexing circuit for the daisy chain port.  Just a couple of flip-flops!<br><br>
+
+<center><img src="./hd20/daisy1.gif"></center><br><br>
+
+Here it is converted to state diagram.  :)<br><br>
+
+<center><img src="./hd20/daisy2.gif"></center><br><br>
+
+The IWM, Z8, and PAL chips share a common 7.5 MHz clock.  Interestingly, the address bus connects to all chips <i>except</i> the Z8 processor.  This includes ROM, RAM, the IWM floppy bus chip, and the PGA.  I assume that addressing connects through the large PGA chip at the bottom of the board to the Z8 processor.  Potentially this was done to provide buffers to ensure adequate driving of all of the address inputs throughout the board, but I don't know this for sure.  That complicates things because the PGA is in charge of a lot of Rodime-related functions, so it makes it very difficult to separate what's happening for the Rodime and what's happening for the Z8.  This chip is presumably too complicated to dump, at least of the purposes of this little project.  Like all other chips on this board, they are labeled only with Apple part numbers, so a lot of guessing is involved in finding the true part number.  Guessing involves making predictions and pulling out various datasheets and matching up known pins to the pinout.  This worked quite well to dump the ROM!  I might not <i>openly</i> distribute the ROM dump here but do chime in or browse around if you're interested.  You'll find what you're looking for, including a nifty disassembled LST file.<br><br>
+
+I believe that I cracked the PAL chip, though.  Well, not physically - it still works after I removed it.  The PAL chip gates data in and out of the HD 20 depending on bus state and also some intervention from the Z8 processor.  I dumped this with a VERY rudimentary dumper/cracker that I slapped together and ran on my 68HCS12 demo board.  This tested 256 of a theoretically possible 65536 inputs because each output is also an input to the PAL logic.  In OE' high state, 2 of the outputs can be external inputs, but this does not increase the 65536 figure, only makes those 2 inputs easier to poke at.  I feel pretty good about it even with such a small sample though.  Here are the equations:<br><br>
+
+Next State Output:<br>
+F0 = Pin 12: RD (serial data output to floppy bus) and RD Data (serial data to IWM input)<br>
+F1 = Pin 13: Z8 P22 (floppy control line state to Z8)<br>
+F2 = Pin 14: nc<br>
+F3 = Pin 15: nc<br>
+F4 = Pin 16: nc<br>
+F5 = Pin 17: Some random transistor (floppy control line state to [unknown])<br>
+F6 = Pin 18: Z8 P27 (floppy control line state to Z8)<br>
+F7 = Pin 19: nc<br><br>
+
+Input:<br>
+A = Pin 9: nc (notably missing from minimized logic!)<br>
+B = Pin 8: PAL OE'<br>
+C = Pin 7: CA0 (floppy control line 0)<br>
+D = Pin 6: CA1 (floppy control line 1)<br>
+E = Pin 5: CA2 (floppy control line 2)<br>
+F = Pin 4: Z8 P23 (serial data output from Z8)<br>
+G = Pin 3: WR Data (serial data output from IWM)<br>
+H = Pin 2: WR (serial data input from floppy bus)<br><br>
+
+Data Dump Minimized by Logic Friday:<br>
+F0 = F4 D' + F2 F3 D<br>
+F1 := E + C' D<br>
+F2 := F + G' H + G H'<br>
+F3 := F + G' H'<br>
+F4 := G H + F' H'<br>
+F5 := C + D + E'<br>
+F6 := C' D' E'<br>
+F7 := G H + G' H'<br><br>
+
+Note that F0 is not gated, so it actually uses current/next states of F2, F3, and F4.  It doesn't latch previous states in and of itself.  F2, F3, and F4 are gated, though, so there is still a gated effect, with asynchronous influence from input D.
+
+Also note that the OE' input (also connected to input B) turns all connected outputs high-impedance when high.  OE' behaves this way in a hard-wired fashion for all gated outputs (F1-F6) on this chip.  Specifically on F0, I tested by running through the microcontroller dumper/cracker program that I made once with a 10k pull-up and again as a pull-down on this output and noting differences as high-impedance state.  These states were the same as the normal OE' behavior of the other outputs.  Though I have not thoroughly cracked this chip, and it is potentially possible for there to be a whole hidden state machine in there, I do believe that the data I have here looks good and makes good sense.  With that reality-check in place, I'll go ahead and stop right here with the PAL chip.<br><br>
+
+Follow my progress <a href="http://68kmla.org/forums/viewtopic.php?f=7&t=14708">here</a>.  I am user Dennis Nedry.
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+document.write("<font face='arial'><center><img src='../index_images/bjb.png'><br><br><table cellspacing='0' cellpadding='0' border='0' width='90%'><tr><td background='../apple_gui/tab_pane_TL.png' width='11' height='24'></td><td background='../apple_gui/tab_pane_T.png' height='24'><nobr><center>");
+
+document.write("<img src='../apple_gui/new_tabs/projects.png' width='332' height='24' alt='Navigation' usemap='#navigation' border='0'><map name='navigation'><area shape='rect' coords='0,0,62,24' href='https://benboldtumd.github.io/index.html'><area shape='rect' coords='62,0,136,24' href='https://benboldtumd.github.io/projects/index.html'><area shape='rect' coords='136,0,180,24' href='http://www.linkedin.com/in/benboldt'><area shape='rect' coords='180,0,224,24' href='http://www.facebook.com/science.spectrum'><area shape='rect' coords='224,0,332,24' href='https://benboldtumd.github.io/multimedia/index.html'></map>");
+
+document.write("</center></nobr></td><td background='../apple_gui/tab_pane_TR.png' width='11' height='24'></td></tr><tr><td background='../apple_gui/tab_pane_L.png' width='11'></td><td bgcolor='#007A7A' background='../apple_gui/tab_pane_FILL.png'>");

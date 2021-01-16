@@ -1,0 +1,138 @@
+<html>
+<head>
+<title>
+Ben Boldt - Rube Goldberg Machine
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+
+<font size=+3><br>Rube Goldberg Machine</font><br>
+For PHYS 2012<br><br>
+
+<table width="75%" border="1" cellspacing="0" cellpadding="12" bgcolor="#B6C7D8"><tr><td>
+This is an extra credit project that I worked on for one of my general physics classes.  It was a minimal amount of extra credit, but when I saw an opportunity to combine a 1993 Macintosh, a fast 68HC12 microcontroller and some toys from when I was little in such a way that it would come to life (!), I just poured all sorts of creativity into it.<br><br>
+
+This page is an overview of how the machine worked, from start to finish.  The Mac was used to project the 16-bit 640x480 images onto a large screen in the lecture hall.<br><br>
+
+<center><b><a href="./goldberg/Rube_Goldberg.wmv">Watch the video!</a></b></center><br><br>
+
+I modified the program to scroll quickly through each slide on its own for this video.  The actual presentation took much longer, allowing time for me to explain each slide.
+</td></tr></table><br><br>
+
+<img src="./goldberg/view1.jpg" width="704" height="528"><br><br>
+<img src="./goldberg/view2.jpg" width="704" height="528"><br><br><br>
+
+<b>Program Sequence:</b><br><br>
+
+Load binary program into microcontroller from Macintosh.<br><br>
+
+Run microcontroller program automatically from Macintosh.<br><br>
+
+Load ball bearing onto energized solenoid.<br><br>
+
+Initialization of all motors to home position:<br>
+<table><tr><td><ul>
+<li>close T-Rex mouth</li>
+<li>rotate T-Rex left</li>
+<li>rotate T-Rex right</li>
+<li>lift T-Rex head to top</li>
+<li>place T-Rex head approx. 2/3 of the way back down</li>
+<li>dip bubble wand all the way to the bottom</li>
+</ul></td></tr></table>
+
+Initial presentation:<br><br>
+
+<img src="./goldberg/1.gif"><br><br>
+<img src="./goldberg/2.gif"><br><br>
+<img src="./goldberg/3.gif"><br><br>
+<img src="./goldberg/4.gif"><br><br>
+<img src="./goldberg/5.gif"><br><br>
+
+End of initial presentation.<br><br>
+
+<img src="./goldberg/6.gif"><br><br>
+
+Click "Start" button (not shown) to pass timing over to the machine.<br><br>
+
+<img src="./goldberg/7.gif"><br><br>
+
+Show that direction of current doesn't matter, and in fact AC would even be acceptable:<br><br>
+
+<img src="./goldberg/8.gif"><br><br>
+
+Move head to top position, compensate for overshoot.<br><br>
+Release power to solenoid relay.<br><br>
+Ball begins to roll.<br><br>
+
+<img src="./goldberg/11.gif"><br><br>
+
+Open mouth.<br><br>
+Delay.<br><br>
+Ball drops in mouth during delay.<br><br>
+Chew subroutine.<br><br>
+
+Look around, act like a dinosaur:
+<table><tr><td><ul>
+<li>Move head 2/3 down.</li>
+<li>Turn head left.</li>
+<li>Turn head right.</li>
+<li>Turn head up.</li>
+</ul></td></tr></table>
+
+Dinosaur Roar sound effect<br><br>
+
+<img src="./goldberg/12.gif"><br><br>
+
+Continue acting like a dinosaur:
+<table><tr><td><ul>
+<li>Move head 2/3 down.</li>
+<li>Turn head left.</li>
+<li>Turn head right.</li>
+<li>Turn head left.</li>
+<li>Turn head down.</li>
+<li>Turn head right.</li>
+<li>Turn head left.</li>
+</ul></td></tr></table>
+
+Dinosaur spits out ball.<br><br>
+
+Show how I used a resistor in series to bring down voltage to motors:<br><br>
+
+<img src="./goldberg/9.gif"><br><br>
+
+Show how movements are controlled with reed sensors and magnets:<br><br>
+<img src="./goldberg/10.gif"><br><br>
+
+Show physics concept about colors of bubbles:<br><br>
+
+<img src="./goldberg/13.gif"><br><br>
+
+Enable Quit button on Macintosh <br><br>
+
+Bubble blowing operation begins and continues indefinitely.
+<table><tr><td><ul>
+<li>Repeat 3-2-1-4 stepper sequence to raise wand</li>
+<li>engage fan relay</li>
+<li>delay</li>
+<br>(Loop)
+<li>turn off fan</li>
+<li>lower (1-2-3-4 stepper sequence)</li>
+<li>turn on fan</li>
+<li>raise</li>
+<li>delay</li>
+(loop)
+</ul></td></tr></table>
+
+
+</center>
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

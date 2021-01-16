@@ -1,0 +1,80 @@
+<html>
+<head>
+<title>
+Ben Boldt - Nintendo CHR-ROM to CHR-RAM Conversion
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">Nintendo CHR-ROM to CHR-RAM Conversion</font></center><br><br><br>
+
+Somebody called SnoBro made an excellent homebrew Nintendo ROM file that does one thing: it plays Sweet Child O' Mine by Guns N' Roses.  The sound that this guy has produced with a Nintnedo is absolutely incredible in my opinion.  Running it in an emulator was just not enough for me, so I decided to try getting it to run in a real Nintendo cartridge that I had previously converted to flash memory.  This cartridge has PRG-ROM and CHR-RAM, and SnoBro's file expects both to be ROM.  I figured it didn't matter because lacking CHR-ROM would likely only distort the graphics and have no effect on the sound.  I tried it, and sure enough, there were garbage graphics.  But the sound was also distorted.<br><br>
+
+I knew this meant 1 of 2 things.  Either the music only plays properly in an emulator, or there is some strange dependency on CHR-ROM that causes either a data corruption or some sort of bus conflict when the correct CHR data is not present.  So I decided to hack the PRG-ROM to bootload the original contents of CHR-ROM into the CHR-RAM chip when the game first loads.  There was plenty of unused space in the PRG-ROM of this game, enough to easily store the 8 kByte CHR-ROM dump.<br><br>
+
+To do this, I had to do 3 things:
+<ul>
+<li>Find a place in PRG-ROM to store the CHR-ROM dump</li>
+<li>Write a routine that copies the CHR-ROM dump into CHR-RAM</li>
+<li>Change the reset vector to point to this routine, then at the end of this routine, jump to the original reset vector</li>
+</ul><br>
+
+First I changed the CHR-ROM size byte in iNES header (byte 5) to 0 to indicate that there is no CHR-ROM and that CHR-RAM is present. Next I changed the reset vector located at $7FFD:7FFC (=$FFFD:FFFC) from $0C97 (=$8C97) to $4800 (=$C800).  In order to tell the NES's CPU to address the PRG-ROM, all ROM addresses must be ORed with 0x8000 to put them into the correct CPU address space.  Here is my routine:<br><br>
+
+<table width="100%" border="1"><tr><td>
+<pre>
+
+           ORG $4800
+
+           ; Set up auto-increment VRAM address
+AD 00 20           LDA $2000
+29 FB              AND #$FB
+8D 00 20           STA $2000
+
+           ; Init VRAM address to $0000
+A9 00              LDA #$00
+8D 06 20           STA $2006
+8D 06 20           STA $2006
+
+           ; Set pointer at RAM location $0000 to PRG-ROM address $5000 (=$D000)A9 00              LDA #$00
+85 00              STA $0000
+A9 D0              LDA #$D0
+85 01              STA $0001
+
+A0 00      copy2:  LDY #$00     ; Y = index
+B1 00      copy1:  LDA ($00),Y  ; Load byte from PRG-ROM
+8D 07 20           STA $2007    ; Store byte into CHR-RAM (this auto-increments)
+C8                 INY
+D0 F8              BNE copy1
+E6 01              INC $0001    ; Increment pointer
+A5 01              LDA $0001
+C9 F0              CMP #$F0     ; Stop copying at PRG-ROM address $7000 (=$F000)
+30 EE              BMI copy2
+4C 97 8C           JMP #$8C97   ; Jump to the original reset vector $0C97 (=$8C97)
+
+           ORG $5000
+
+           ; Insert $2000-byte CHR-ROM dump here.
+
+</pre>
+</td></tr></table><br><br>
+
+Then I proceeded to delete the original CHR-ROM dump from the file.  This worked just like the original in an emulator!  It fixed the graphics on my real Nintendo, but unfortunately the game still had distorted sound.  Unfortunately, this tells me that the game likely contains bugs that make it only run properly in emulators!  Oh well, you can't win them all.
+
+
+<center>
+<img src="./chr_rom_to_ram_conversion/macfc.png"><br>
+<a href="./chr_rom_to_ram_conversion/sweetchildomine_mod.nes.zip">Download Modified Homebrew ROM</a>
+</center>
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

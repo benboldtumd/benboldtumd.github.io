@@ -1,0 +1,41 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+<title>
+Ben Boldt - Newsletter Touch Screen
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">Newsletter Touch Screen</font></center><br><br><br>
+
+The Works got a couple of 1280&times;1024 touch screen displays generously from 3M and Kris wanted to use one of them at the front desk to let people register for the newsletter.  I took on the project and developed an app in Java that does just that.  This app is currently running on a Windows XP box.<br>
+<br>
+<center><iframe width="420" height="315" src="http://www.youtube.com/embed/dYy8CL0-XVI" frameborder="0" allowfullscreen></iframe></center><br>
+<br>
+Note that the framerate in this video dropped a lot from the video capture process.  The gear spins at 60 FPS with 1/2 degree rotation per frame on the PC that will run this touch screen.<br>
+<br>
+The most secure way to register for the newsletter is through the web form available at <a href="http://theworks.org">theworks.org</a>.  So this Java app actually fills out that form behind the scenes and submits it, transparent to the visitor.<br>
+<br>
+An optional information screen and an animated thank you screen have been added after this video was recorded.  Also in this video, the velocity of motion is constant.  Since then, the velocity of all motion is plotted on a curve similar to a motion profile of a stepper motor.  This makes the motion more smooth.  The gear is drawn with vectors calculated with trig equations, and as you can imagine, that ONE gear is about all that Java can do without dropping below 60 FPS on a modern PC.  hahaha.  The touch screen resets to the welcome screen after it has not been touched for 2 minutes.  Here are some of the issues remaining:<br>
+<ul>
+<li>Cancel and Clear buttons needed on e-mail screen</li>
+<li>Back and Cancel buttons needed on optional info screen</li>
+<li>The optional info screen should feedback the e-mail address</li>
+<li>The checkboxes on the optional info screen should have touchable text</li>
+<li>More testing</li>
+</ul>
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

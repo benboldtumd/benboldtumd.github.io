@@ -1,0 +1,1 @@
+document.write("</td><td background='../apple_gui/tab_pane_gray_R.png' width='11'></td></tr><tr><td background='../apple_gui/tab_pane_gray_BL.png' width='11' height='11'></td><td background='../apple_gui/tab_pane_gray_B.png' height='11'></td><td background='../apple_gui/tab_pane_gray_BR.png' width='11' height='11'></td></tr></table></center>");

@@ -1,0 +1,97 @@
+<html>
+<head>
+<title>
+Ben Boldt - Scheme to Theme Converter
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">Scheme to Theme Converter</font></center><br><br><br>
+
+Many years ago, there was a cool shareware application called Kaleidoscope that changed the look and feel of the Mac OS user interface.  Kaleidoscope users had the ability to select "scheme" files that would change their system from ordinary to silly, industrial, or artistic.  It was quite an innovative piece of software.<br><br>
+
+<center>
+<img src="./scheme2theme/kaleidoscope.gif"><br><br>
+</center>
+
+When Mac OS 8.2 was being developed, Apple made their own "theme" system that worked in a similar way.  Users would select a theme file and the entire user interface would change to a whole different look.  During this time, somebody at Apple went so far as to create a scheme-to-theme converter and demonstrated it during some Macworld Expo or something.  The developers of Kaleidoscope were furious to say the least.  Mac OS 8.2 was not ever released.  Instead, development continued into Mac OS 8.5 as Steve Jobs made his famous return to Apple.  Well, Steve didn't like themes, he wanted a consistent interface on Macs, so he canceled the theme project and unleashed Aqua several years later as part of Mac OS X.<br><br>
+
+A little-known fact is that Apple was almost finished with the theme engine so they left it in Mac OS 8.5 when it was released, and the themes included with the 8.5 public beta still worked in the release.  In fact, they continued to work all the way until Mac OS 9.2.2!<br><br>
+
+<center>
+<img src="./scheme2theme/appearance.gif"><br><br>
+</center>
+
+Any-hoo, Apple never released their scheme to theme converter.  So I thought, let's finally make one.  Or at least a little bit of one, just to pay tribute to this strange time when Steve axed all of the bitmaps and beige computers in favor of the iMac and the Aqua interface.<br><br>
+
+<center>
+<img src="./scheme2theme/document.gif">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="./scheme2theme/alert-dialog.gif"><br>
+Original Stored 'cicn' format image<br><br>
+<img src="./scheme2theme/document-colors.gif">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="./scheme2theme/alert-dialog-colors.gif"><br>
+Colored areas that are actually used in the scheme<br><br>
+</center>
+
+Schemes and Themes accomplish a very similar effect on the Macintosh, but they go about it in very different ways.  The image resources stored in schemes are very different than those stored in themes.  Both contain raw indexed data, though, so parsing and re-formatting image data results in a lossless conversion.  The images above show how Kaleidoscope's document and alert window images are all stuffed into one image.  Colored portions designate individual pieces.<br><br>
+
+This converter currently reads the source image and splits it into all of the separate little images that themes need, and stores them into a theme.  So far, the converter converts all types of window frames, but it does not convert any other elements, such as controls, background colors, or most text colors.<br><br>
+
+I am constraining this project to parsing only Apple-specific image resource types contained in schemes.  For example, 'cicn', 'ics8', 'ics#', 'ppat', 'clut', etc.<br><br>
+
+Here are several schemes converted to themes:<br><br>
+
+<center>
+<img src="./scheme2theme/onyx.gif"><br><br>
+<img src="./scheme2theme/ice.gif"><br><br>
+<img src="./scheme2theme/sherbet.gif">
+</center>
+
+<br><br><hr><br><br>
+
+More progress!  The converter handles 'cinf' --> 'layo' conversion now, which includes pulling text colors and inserting into the 'clr#' resource.  Push buttons, bevel buttons, and background colors from Onyx are demonstrated in this picture:<br><br>
+
+<center>
+<img src="./scheme2theme/bevel_buttons.gif">
+</center>
+
+<br><br><hr><br><br>
+
+I am just beginning to parse out wnd# resources.  wnd# is responsible for laying out custom window frames.  Themes use layo resources for this purpose, just like controls.<br><br>
+
+<center>
+<img src="./scheme2theme/wnd_beginning.gif">
+</center>
+
+<br><br><hr><br><br>
+
+Follow my progress here:<br><br>
+<a href="http://68kmla.org/forums/viewtopic.php?f=29&t=18159">68kmla.org Forum</a><br><br>
+
+The source code has no license and is quite hackish.  There's plenty of coupling going on and not near enough comments.  Please don't judge me for it, I like to think that I write much nicer code than this for important things!  It is written in C++ and likes to be built in Mac OS X using Xcode.  The code is provided with no warranties whatsoever and it may very well blow a hole right through your CPU for all I know.  Use at your own risk and only as a curiosity.<br><br>
+
+Download Source Code:<br><br>
+<table border=1>
+<tr><td width="150"><b>Version</b></td><td width="150"><b>Date</b></td></tr>
+<tr><td><a href="./scheme2theme/scheme2theme 0.5.zip">v0.5</a></td><td>5/21/12</td></tr>
+<tr><td><a href="./scheme2theme/scheme2theme 0.3.zip">v0.3</a></td><td>5/13/12</td></tr>
+<tr><td><a href="./scheme2theme/scheme2theme 0.2.zip">v0.2</a></td><td>4/18/12</td></tr>
+<tr><td><a href="./scheme2theme/scheme2theme 0.1.zip">v0.1</a></td><td>4/13/12</td></tr>
+<tr><td><a href="./scheme2theme/scheme2theme 0.0.zip">v0.0</a></td><td>4/5/12</td></tr>
+</table>
+
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

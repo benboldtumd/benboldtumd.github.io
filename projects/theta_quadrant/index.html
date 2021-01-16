@@ -1,0 +1,437 @@
+<html>
+<head>
+<title>
+Ben Boldt - Theta Quadrant
+</title>
+<base href="../" />
+</head>
+
+<body bgcolor="#408000" link="#000000" alink="#404040" vlink="#202020" background="../apple_gui/stripes.gif">
+
+<script src="./pagetop_projects_instruments.js"></script>
+
+<center><br><img src="./theta_quadrant/title.png" width="468" height="86" alt="Theta Quadrant"><br>
+
+<table width="75%" border="1" cellspacing="0" cellpadding="12" bgcolor="#B6C7D8"><tr><td>
+What is Theta Quadrant?<br><hr>
+Each ECE student at UMD must complete one capstone senior design project as a requirement to graduate.  I conceived this idea approximately in 10th grade, although I had no idea that I would eventually implement it!<br><br>
+
+Students are allowed to come up with their own design, which is a two-semester obligation, or implement a predetermined design, which is one semester.  I started the two-semester version with another student.  We decided that I would build the physical apparatus in the first semester because of the associated skills and parts that I already had.  He was slated to write the 4-dimentional program (3D + animation) in 68HC12 assembly language during the second semester.  Unfortunately my partner decided to leave the team for the next semester.<br><br>
+
+I was <i>determined</i> to make this project work!  So I decided to press on by myself.  The project was a success and I believe it really shows my determination and ability to adapt to a drastic change in the course of a project.  I managed my time well and finished the project before the deadline.  This is apparently the first ECE senior design project at UMD ever completed by just one person.<br><br>
+
+The page below is in log form.  I added to this page each time something noteworthy occurred.  For example, the "theory" section was written before anything was built.<br><br>
+
+<center><b><a href="./theta_quadrant/Theta_Quadrant_Report.pdf">View the Report</a></b> (PDF)<br><br>
+<b><a href="./theta_quadrant/Theta_Quadrant_Presentation.ppt">View the Presentation</a></b> (PowerPoint)</center>
+</td></tr></table><br><br>
+
+<object width="400" height="266" ><param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" /><param name="movie" value="http://www.facebook.com/v/10100262118669020" /><embed src="http://www.facebook.com/v/10100262118669020" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="400" height="266"></embed></object><br><br>
+
+</center>
+
+<font face="Arial Black" color="#FFFFFF" size="+4">
+THEORY
+</font>
+
+<table bgcolor="#AAFFAA" width="100%" border="0" cellspacing="25" cellpadding="0">
+<tr><td><font face="Lucida Grande, Arial">
+
+<!-- Start Content Area 1 -->
+
+The idea of this project is to create a 32x32 pixel LED display, and to spin it about a vertical axis on one edge.  This sweeps out a cylinder shape, and the display is to be controlled by a microcontroller in order to produce a three-dimensional image.  The LEDs are to be turned on and off with precise timing to create this illusion.  Here is a sketch I made before starting the project:<br><br>
+
+<center><img src="./theta_quadrant/sketch.png" width="509" height="357"></center><br><br>
+
+32 &times; 32 LED Display:<br><br>
+
+<center><img src="./theta_quadrant/display_scale_model.png" width="514" height="536"></center><br><br>
+
+<b>Description</b><br><br>
+
+The primary goal of this apparatus is to draw 3D wireframe surfaces with line segments.  Segments would be defined by entering in endpoint coordinates, and software running on the microcontroller would then mathematically connect these points together.<br><br>
+
+The secondary goal is to make a rectangular to polar conversion, so lines drawn with the display are trigonometrically corrected to appear straight instead of curved with the pathway of the spinning display.  It is unclear at this point if that is completely possible with the given hardware because this conversion may consume too much memory or be too processor-intensive.<br><br>
+
+The entire volume of the image cannot be pre-calculated and stored in a direct bitmap format in memory because this would require 22.5 kibibytes of RAM.  I have approximately 12 kibibytes of RAM available.  This is why points may need to be defined first, then connected on-the-fly.  (Calculation:  32 pixels wide &times; 32 pixels tall &times; 180 frames per revolution = 184,320 3D pixels = 184,320 bits = 23,040 bytes = 22.5 kibibytes.)  There are 256 kibibytes of Flash / EEPROM, however.<br><br>
+
+<b>Hardware</b><br><br>
+
+The display is viewable from both sides.  It is constructed with surface-mount LEDs and soldered together with very thin 30-AWG wire so light emission can be seen easily.  The LEDs point straight up so they have an opportunity to be seen equally from the most angles.  Transistors are used to buffer the display from the microcontroller.  Only one column of the display can be displayed at a time in order to multiplex an image across the whole display, so 5 bits from the microcontroller must be decoded to 32 bits for this purpose.  I have chosen to use 2&times; 74LS154 4 to 16 bit decoder ICs.<br><br>
+
+The microcontroller must also know exactly where the display is.  So for each 2 degrees of rotation, there is a laser-printed line on a circular transparent sheet that interrupts a photosensor and tells the microcontroller that the display has moved.  By using this configuration with a photosensor, it is possible for the rotational speed of the display to vary without disturbing the image volume.  Because of this, any ordinary, non-synchronous motor, or even manually spinning, can be used to rotate the display.<br><br>
+
+Inherent with this setup, the microcontroller can not tell if it is being turned backwards or forwards.  Care must be taken to ensure the display is turning the right way and does not momentarily reverse if spinning is done manually.<br><br>
+
+<b>Construction</b><br><br>
+
+Lazy Susan bearings are used in this project so the apparatus can rotate smoothly and safely at higher speeds.  The Dragon12 board is attached to a disc and spins along with the display.  Power is fed to the display and Dragon12 board with a brush system plugged into an AC to DC transformer.  The DC received on the rotating part of the apparatus is unstable because of the nature of brushes, so a large capacitor is used to smooth the power, in conjunction with a voltage regulator.  The input voltage of the regulator should always remain considerably higher than the output voltage.  This makes for a very stable voltage source available to all components on the moving disc.<br><br>
+
+<!-- End Content Area 1 -->
+
+</font></td>
+
+</tr>
+<tr><td height="1"><font size="-5">&nbsp;</font></td></tr> <!-- Pad -->
+</table>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+<tr><td height="1"></td></tr>
+<tr><td bgcolor="#A1E5D4" height="1"></td></tr></table>
+
+<font face="Arial Black" color="#FFFFFF" size="+4">
+IMPLEMENTATION
+</font>
+
+<table bgcolor="#99CCFF" width="100%" border="0" cellspacing="25" cellpadding="0">
+<tr><td><font face="Lucida Grande, Arial">
+
+<!-- Start Content Area 3 -->
+
+<center>
+<table bgcolor="#FFFFFF" cellspacing="0" border="1">
+<tr><td colspan=2>
+<center><b>Milestone Checklist</b></center>
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Acquire parts to build a box and LED display
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Build LED display
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Build the box
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Attach Dragon12 board to the metal disc
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Build a module out of plexiglass to house the LED display
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Attach display module to the metal disc
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Build transistor arrays
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Connect transistor arrays to Dragon12 board
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Build 2&deg; photo interrupter out of transparencies
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Attach photosensor to use the interrupter
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Brush contact system
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Hook up transformer, large capacitor and voltage regulator(s)
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Hook up motor
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Write a program that produces a test 2D image
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Write a program that produces a test 3D image
+</td></tr>
+<tr><td bgcolor="#FFFFFF">
+Skipped!
+</td><td width="250">
+Write a program that draws arc line segments
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Write a program that draws straight, trig-corrected line segments
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Modify program for animation
+</td></tr>
+<tr><td bgcolor="#FFFFFF">
+Skipped
+</td><td width="250">
+Load finalized program into ROM on the Dragon12
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Presentation
+</td></tr>
+<tr><td bgcolor="#80FF80">
+Done
+</td><td width="250">
+Documentation
+</td></tr>
+</table></center><br><br>
+First I built a prototype 8 &times; 8 display to test my soldering skills and electrical characteristics of the LEDs and transistors.<br><br>
+
+<center><img src="./theta_quadrant/8x8_display_1.jpg" width="704" height="528"></center><br><br>
+
+<center><img src="./theta_quadrant/8x8_display_2.jpg" width="704" height="528"></center><br><br>
+
+Moving on to the 32 &times; 32 display, here I am positioning 32 LEDs in a jig to be soldered into a complete row.  Care was taken to ensure the LEDs are the correct orientation.  The cathodes were all on top.  Because LEDs are diodes, they only emit light when they are forward biased.<br><br>
+
+<center><img src="./theta_quadrant/led_positioning.jpg" width="704" height="528"></center><br><br>
+
+Soldering a 32-AWG wire from the ribbon cable across the cathodes of all the LEDs.  This horribly tedious process was repeated for all 32 rows, for a total of 1024 little LEDs.  SURELY a machine could be invented to automatically do this process in time it took me.<br><br>
+
+<center><img src="./theta_quadrant/led_soldering.jpg" width="704" height="528"></center><br><br>
+
+Next, a new jig needed to be built to hold all the rows straight so that new wires could be soldered on to the anodes, connecting them together as columns.  The substrate is cardboard, and the dividers are made from 1/32 inch thick birch plywood veneer.<br><br>
+
+<center><img src="./theta_quadrant/jig.jpg" width="704" height="528"></center><br><br>
+
+Here is a picture that illustrates the complete jig, with the individual rows inserted, and beginning to solder wires across the LED anodes to form columns.<br><br>
+
+<center><img src="./theta_quadrant/jig_columns.jpg" width="704" height="528"></center><br><br><hr><br>
+
+Here are some motion blur pictures of when I mounted the Dragon12 board onto the aluminum disc.<br><br>
+
+<center><img src="./theta_quadrant/dragon_spin.jpg" width="704" height="528"></center><br><br>
+<center><img src="./theta_quadrant/dragon_spin_fast.jpg" width="704" height="528"></center><br><br><hr><br>
+
+Here is a picture of when I mounted the 32 &times; 32 LED display in plexiglass (specifically Lexan) and proceeded to mount it on top of the Dragon12 board.<br><br>
+
+<center><img src="./theta_quadrant/display_stationary.jpg" width="704" height="528"></center><br><br>
+<center><img src="./theta_quadrant/display_spin.jpg" width="704" height="528"></center><br><br><hr><br>
+
+Here are pictures of progress installing the transistor banks.  These are used to buffer the display from the Dragon12 board.<br><br>
+
+<center><img src="./theta_quadrant/transistors_1.jpg" width="704" height="528"></center><br><br>
+<center><img src="./theta_quadrant/transistors_2.jpg" width="704" height="528"></center><br><br><hr><br>
+
+Investigation of LED surge current abilities.  The LEDs that I am using have a rated 500mA maximum surge current for &le; 10&mu;s.  I have calculated that each LED will be on for exactly 17 cycles.  To fill an entire column, it usually takes 49 cycles.  To fill the entire display (all 32 columns), it takes 1569 cycles.<br><br>
+
+So any particular LED can be on for 17 cycles, but must be off for 1552 cycles.  Each cycle is 1/24,000,000 of a second because the Dragon12 board runs at 24MHz.  So converting cycles to time, LEDs can be on for 0.708&mu;s but must be off for 64.7&mu;s.  This is a 1.08% duty cycle.  It seems logical that I should be able to use a higher current with this configuration.<br><br>
+
+It's still hard to believe that applying 500mA to a surface-mount LED for any length of time would not instantly burn it out, so I ran a test.  I hooked up a spare LED to a variable voltage source, initially set to the maximum rated sustained voltage of the LED (2.6V).  I placed an NPN transistor in series on the cathode side of the LED which would allow me to turn the LED on and off with a digital signal.  A resistor connected a pin on my Dragon12 board to the base of the transistor.  I proceeded to write a program that turned the LED on and off with precise, cycle-exact timing.  This timing was verified with my oscilloscope.  To my great surprise, the LED was fairly bright even at 1% duty.<br><br>
+
+Most important was for me to observe the current.  So I took a fat 0.5&Omega; resistor and connected it in series with the LED.  Observing the voltage across this resistor could tell me the current running through the LED by using Ohm's law.  So current was twice the observed voltage.  Looking at the oscilloscope and zooming in on the slice of time when the LED was on, I measured that the LED's current was about 30mA, which is exactly what it is supposed to be.  This verifies my setup.  I then proceeded to increase the voltage from 2.6V to 5V.  This made the LED more than half of the original brightness at sustained 2.6V DC.  Here is what I observed on the oscilloscope:<br><br>
+
+<center><img src="./theta_quadrant/scope.jpg" width="704" height="528"></center><br><br>
+
+The waveform in the center is the voltage across the 0.5&Omega; resistor.  The waveform across the bottom is the digital output from the Dragon12 board.  Because of the scale of time and voltage, my equipment is showing some fairly noticeable oscillations in the resistor.  As you can see, the resistor has 71mV across it when the LED is on.  Multiply by 2 and this becomes 142mA!<br><br>
+
+Indeed, a higher current may be used with this setup in order to achieve a brighter display.  The test circuit was run for 12 hours in order to observe any change in the waveform displayed on the oscilloscope, as this would be an indication of damage to the LED.  The waveform did not change, so I feel safe using 5.0V for the LED voltage.  2.6V will be used during development, though.  Should the program malfunction, it could burn the display at this voltage.<br><br><hr><br>
+
+Part of the brush contact system to get power onto the moving disc.<br><br>
+
+<center><img src="./theta_quadrant/brush_contacts_1.jpg" width="704" height="528"></center><br><br>
+
+It is made of two 3/4" PVC couplings glued together, and then one 1" copper coupling which has been cut in half.  If you look closely, the wires feed through the inside of the PVC, out through a hole, and 1.5" of bare wire is soldered to the rim of the copper.  The soldering was done before the PVC was inserted.  I first bent the bare wire so that it sat perfectly on top of the copper tube.  I then removed the copper tube, held it with a pliers, and heated it with a blow torch for 10 seconds.  After that, I carefully put the tube back under the bare wire and proceeded to solder.  (No soldering iron was necessary.)  The copper tubes were then glued to the PVC and the wires were fed through drilled holes.<br><br>
+
+This whole gizmo will be glued to the bottom of the aluminum disc.  The wires will be fed up through the disc, under the Dragon12 board.  Brushes of some sort will contact the copper tubes.  A motor drive can also be attached to the bottom of this thing to spin the entire apparatus.<br><br><hr><br>
+
+The display module, complete.  The ribbon must now be connected to the Dragon12 board and the red/black wires to selectable voltage regulators.<br><br>
+
+<center><img src="./theta_quadrant/display_complete.jpg" width="704" height="528"></center><br><br><hr><br>
+
+The brush contact system, complete.<br><br>
+
+<center><img src="./theta_quadrant/brush_contacts_complete.jpg" width="704" height="528"></center><br><br>
+
+As you can see, some springs were utilized to produce reliable tension.  The wire is 12 AWG galvanized steel which is adequately rigid.  Also, automotive grease was added to reduce friction and, unexpectedly, it improved continuity.  This has been tested and verified working well enough to power the Dragon12 board without resetting it.  (The Dragon12's built-in regulator was bypassed for this test.)  A large capacitor and voltage regulators will be added to further improve the power on the disc.<br><br><hr><br>
+
+The photo interrupter is now complete.  The 2&deg; marks trigger <span style = "text-decoration:overline">IRQ</span>, an external interrupt, and the one extra-long mark can be accessed by manually polling bit 2 in port E.  This will be used to initialize the orientation of the displayed image.<br><br>
+
+<center><img src="./theta_quadrant/interrupter.jpg" width="704" height="528"></center><br><br>
+
+I wrote a test program that made a beep/click sound every time <span style = "text-decoration:overline">IRQ</span> was called.  It seemed to work fine as far as I could tell.  Bit 2 on port E also tested functional.<br><br>
+
+Much to my dismay, both enable bits on the 74LS154 4-to-16 Decoder chips are inverted, so I had to add a 74LS04 Hex Inverter which didn't quite fit.  It works, though, and this way it's in hardware so I don't have to add any complexity to the program to produce an inverted MSB.  So now I can just increment the port instead of paying special attention to it.<br><br>
+
+Because of a technical issue with the Debug12 monitor, which I am not concerned about any farther than knowing about it's existence, the 2&deg; sensor must be on a clear space in the interrupter or else I can't load a program.  There are two possible remedies for this issue:
+<ol><li>Modify the interrupt control register before loading using command "mm 1E C0" to change the behavior of <span style = "text-decoration:overline">IRQ</span>.</li>
+<li>Turn the disc a little.  Once the program is run, this register is modified.</li></ol><br><hr><br>
+
+The voltage regulators have been installed and the display has been connected to the Dragon12 board.  Obviously I now must display the 32&times;32 1-bit "Welcome to Macintosh" icon.<br><br>
+
+<center><img src="./theta_quadrant/display_image.jpg" width="704" height="528"></center><br><br>
+
+As you can see, there is now a heat sink with two voltage regulators under it.  To the left is a potentiometer that can be used to adjust the main regulator to a safe LED voltage.  The switch to the right is used to select the 5V voltage regulator.  5V can only be applied when the display is refreshing properly.  If the display freezes even for a split second, it will damage the LEDs at this voltage.  It will only take a few seconds to burn out the LEDs completely.<br><br>
+
+With extreme caution, I flipped the switch to 5V:<br><br>
+
+<center><img src="./theta_quadrant/display_image_5v.jpg" width="704" height="528"></center><br><br>
+
+This results in greatly improved brightness, but there appears to be a bleeding effect.  I believe this is a hardware problem, the software is written to make sure all LEDs are off before selecting the next column.  Oh well.<br><br>
+
+Next I wrote a program that uses the rotational sensor interrupts to display the current degree of rotation.<br><br>
+
+<center><img src="./theta_quadrant/degree_61.jpg" width="704" height="528"></center><br><br>
+
+<center><img src="./theta_quadrant/degree_180.jpg" width="704" height="528"></center><br><br>
+
+There are some troubles with bouncing of the sensors.  I was receiving thousands of interrupts per trigger.  For a quick sloppy fix, TOI was used to debounce the input.  A hardware debouncing solution is probably necessary because this software solution is horribly inefficient.  I am also receiving interrupts on both downward and upward slopes which is not correct.  Upward slope should not cause an interrupt but it is because of bouncing.  This is why the display is currently precise to 1 degree instead of 2 degrees.<br><br>
+
+An error that results in greater precision, imagine that.<br><br><hr><br>
+
+A diagram that explains the bouncing behavior.<br><br>
+
+<center><img src="./theta_quadrant/bouncing.png" width="704" height="528"></center><br><br>
+
+The Dragon12 MC9S12DP256 is set up to trigger <span style = "text-decoration:overline">IRQ</span> when a downward slope intersects the logic threshold.  Upward slopes and sustained logic levels do not trigger <span style = "text-decoration:overline">IRQ</span>.<br><br>
+
+The noise you see in the image causes many downward slopes to intersect the logic threshold during both an overall upward slope and downward slope.  This happens many more times than what are shown; it happens on the order of 100 to 1000 of times.  It is not caused directly by the sensor; something is making noise inside the &mu;C itself, possibly the refreshing of the LED display.  To test this, a very clean and stable variable voltage source was hooked up directly to <span style = "text-decoration:overline">IRQ</span> and adjusted to very close to the logic threshold voltage.  <span style = "text-decoration:overline">IRQ</span> was then called continuously.  As soon as RTI was encountered, another interrupt occurred.<br><br>
+
+Within a very small range of voltage surrounding the logic threshold, <span style = "text-decoration:overline">IRQ</span> is subject to noise.  The longer the rise/fall time of the sensor, the longer the sensor voltage is in this range.  It's possible to use a comparator or perhaps a one-shot to substantially decrease the rise/fall time which will help.  The 9S12 is so FAST (24 MHz) that it may still be a problem, so I may also time <span style = "text-decoration:overline">IRQ</span> calls and reject ones that happen too close together.  It is unclear to me how much this will impact the speed of the program.  I am investigating directly polling the free-running timer instead of relying on TOI.<br><br><hr><br>
+
+Thanks to the infinite wisdom and resourcefulness of Dr. Chris Carroll, I have added a Schmitt trigger to both sensors which completely solves the problem.  No software debouncing is even necessary now!<br><br>
+
+<center><img src="./theta_quadrant/schmitt_trigger.png" width="704" height="528"></center><br><br>
+
+This was accomplished with a 74LS132 Quad 2-input Schmitt trigger NAND gate.  The long bar on the interrupter was set up to trigger only with clockwise rotation before.  The new inverted logic caused it to trip only with counterclockwise rotation.  Rather than using another gate to invert the logic again, I just modified the interrupter so that it will be tripped in either direction, removing this somewhat needless feature.<br><br>
+
+There was also a hex inverter in place used for the 5th bit of the decoders.  This was removed in favor of using a third gate on the 74LS132.  One extra Schmitt trigger NAND gate remains.  Should a meaningful opportunity arise, his solemn destiny of being tied to ground may not be permanent.<br><br><hr><br>
+
+A schematic of the display and sensors.<br><br>
+
+<center><img src="./theta_quadrant/schematic.png" width="704" height="969"></center><br><br><hr><br>
+
+Woooooohoooooo!<br><br>
+
+I have figured out a calculation that allows me to easily draw straight lines across the curved path of the display!  Very cool.  I wasn't sure I could do it, but once I finally tried, it only took me a couple of hours to figure out.  All my work is proven in this Mathematica notebook:<br><br>
+
+<a href="./theta_quadrant/theta_quadrant.nb.pdf">Theta Quadrant Lateral Line to Display Intersection Calculation</a><br><br><hr><br>
+
+I have refined the equation found in Mathematica by multiplying the numerator and denominator by cos(&theta;).  This results in an even more simple equation.<br><br>
+
+<center><img src="./theta_quadrant/equation.png" width="327" height="48"></center><br><br>
+
+As you can see, I am now using only sine and cosine functions.  This is an improvement because the previously used secant and tangent functions have periodic vertical asymptotes, which are more difficult to represent in a lookup table.  Also, the lookup tables are reduced because the sine and cosine tables can overlap; they are simply offset by 90&deg;.<br><br><hr><br>
+
+I had a little extra time at the end of my spring break, so I decided to implement this equation into ASM that can run on the 9S12.  Using this, I drew a straight line across the curved path of the display.<br><br>
+
+<center><img src="./theta_quadrant/straight_line.jpg" width="704" height="528"></center><br><br>
+
+This picture doesn't do it much justice.  The display is set to the extended brightness setting which causes bleeding; this is why the image is 2 pixels thick.  You can see the line just fine at normal brightness in a dark room, and actually it is more straight and consistent than this image.  Using long exposure with a digital camera of a quickly moving and flashing object like this creates artifacts.<br><br>
+
+There are still a couple of things to do before I can actually draw a 3D image:<br><br>
+
+<ul><li>Calculate start and end &theta;s so I can draw line segments instead of entire lines</li>
+<li>Modify program to recursively draw multiple lines</li>
+<li>Introduce Z dimension using weighted averages</li>
+<li>Fill between points to make lines parallel or almost parallel to display possible</li></ul><br><hr><br>
+
+Progress:<br>
+<ul><li>Program now uses cylindrical input coordinates to avoid calculating start and end &theta;s.  It would have required an inverse tangent function which is difficult to implement with a table.  No calculation is necessary for that now.</li>
+<li>Program still draws straight, rectangular lines.</li>
+<li>Program draws line segments instead of entire lines now.</li>
+<li>Program now draws multiple lines recursively, designed for up to 256.</li>
+<li>Program detects if each line needs to be drawn at each 2&deg; before making any calculations.  This improves efficiency.</li>
+<li>Z dimension is now being calculated successfully.  Z is not simply a weighted average.</li>
+<li>Calculations only use sine from 0&deg; to 360&deg; now, thus further reducing to one trig table.</li>
+<li>Program preemptively eliminates redundant calculations on a per-line segment basis.</li>
+<li>Since the r and Z calculations are extremely similar, some parts are reused within each 2&deg; for each other which also improves efficiency.</li>
+</ul>
+Efficiency is important for 2 reasons.  The more efficient the program is, the faster the maximum RPM of the display is.  Higher RPM reduces flickering.  Second, the display is turned off during the calculations, so if the calculations take less time, the display is on for longer, which makes the display appear brighter.<br><br>
+
+There are still a couple of things left to do in this project.<br>
+<ul><li>More testing and debugging.</li>
+<li>A special case for when the entire segment lies within the display plane.</li>
+	<ul><li>Indicated when start and end &theta;s are equal in the start and stop coordinates</li>
+	<li>The entire line will be drawn directly on the display in 2D rectangular format</li>
+		<ul><li>'r' = X dimension, 'Z' = Y dimension</li></ul>
+	<li>2D points connected with weighted average type of a calculation</li></ul>
+<li>Draw something interesting with line segments.</li>
+<li><i>MAYBE</i> introduce animation??  Well, we'll see.  It's certainly possible.</li>
+<li>Write up the documentation/report.</li>
+<li>Create and give a presentation.</li></ul><br>
+
+I created a new Mathematica notebook for this.<br><br>
+<a href="./theta_quadrant/theta_quadrant_r_z.nb.pdf">Theta Quadrant r & Z Calculation</a><br><br><hr><br>
+
+Progress:<br>
+<ul><li>Z axis is now being displayed properly.</li>
+<li>Intersections that make vertical and horizontal lines on the display (instead of just points) are now working.</li>
+<li>I have drawn a 3D wireframe cube.</li>
+<li>I can plot an individual point now by entering it as both the start and end point of a line.</li>
+<li>Additional measures to prevent accidental screen burn in extended brightness mode.</li></ul>
+
+Still needs work:<br>
+<ul><li>Some intersections that form horizontal lines on the display are drawing backwards, can wipe out surrounding memory and cause the program to malfunction thereafter.</li>
+<li>Intersections that form a diagonal line on the display are detected but not drawn yet.</li>
+<li>Draw a cube tipped and standing on its corner (uses diagonal line display intersections).</li>
+<li>Draw something more cool than a cube.</li></ul><br><hr><br>
+
+After a slight vacation from the project, progress was made.  All intersections are now implemented properly.  I can draw any sort of line now.  I drew a pyramid with two lines across each face.  This demonstrates lines that form a diagonal line intersection on the display.  There are 8 of these lines in the pyramid.  There are also 4 lines that form horizontal line intersections on the display.  This image does not do it justice; the camera did not capture a complete revolution and several surrounding LEDs that are actually off appear to be on due to reflection.  The actual image is much sharper and is not nearly as thick as this.<br><br>
+
+<center><img src="./theta_quadrant/pyramid.jpg" width="704" height="528"></center><br><br>
+
+The project is reaching its final stages.  This is what remains:<br>
+<ul><li>A motor to spin the display</li>
+<li>Animation of the 3D image if time allows</li>
+<li>Presentation and report</li></ul><br><hr><br>
+
+I have taken care of the last mechanical things.  I glued on a cheap PVC sewage line cap to act as a large pulley, and connected that to a DC motor using a belt and another spring-loaded pulley.  A PC's ATX power supply has been mounted inside to provide the necessary voltages (12V and 24V).  Switches were added to give the ability to separately power up the Dragon12 board and the motor.<br><br>
+
+<center><img src="./theta_quadrant/belt_drive.jpg" width="704" height="528"></center><br><br>
+
+The project is basically done at this point, unless I decide to add animation to the 3D object.  This will be determined by how much time I can find to work on it.<br><br><hr><br>
+
+After some testing, I have discovered that the belt drive causes an additional torque on the shaft due to the tightness of the belt.  That causes the bearings to not mesh properly and causes random occurrences of excessive friction, enough to completely stop the display.  It is not possible at this point in the project to swap in different bearings; that would be a fairly lengthy process.  A different method will have to be developed.<br><br><hr><br>
+
+I combined my idea of using pulleys inside the box with Dr. Carroll's idea of using a drill externally against the outside edge of the round part of the display.<br><br>
+
+<center><img src="./theta_quadrant/new_belt_drive.jpg" width="704" height="528"></center><br><br>
+
+As you can clearly see, this is not a professional job but it seems to work quite well.  I have measured it running at 7.1 R/sec, or 426.8 RPM.  This is a substantial improvement from the previous setup which ranged wildly between 300 and 0 RPM.  The enlarged white pulley on the motor is a 3/4" PVC cap, super-glued into place.  Super-glue has proven to have quite an effective bond on PVC.  There is hot glue around the PVC to keep the belt in place.  The large spring absorbs low frequency shock and the flexible, non-breakable piece of Lexan absorbs higher frequency shock.  This shock is caused by imperfections in the large disc and tracking of the belt.<br><br><hr><br>
+
+After quite a bit of debugging to find one bugger of a little mistake, Theta Quadrant is now fully capable of animation!  I added a triangular prism to the display in quadrant 3 that moves up and down.  I have also nearly finished the presentation.  It's exciting and yet a bit sad that this project is now complete.  The only way to fix that is to start another ridiculously insane and complicated project!
+
+<!-- End Content Area 3 -->
+
+</font></td>
+
+</tr>
+<tr><td height="1"><font size="-5">&nbsp;</font></td></tr> <!-- Pad -->
+</table>
+
+<br><br>
+
+</td>
+<td background="../apple_gui/tab_pane_R.png" width="11"></td></tr>
+<tr><td background="../apple_gui/tab_pane_BL.png" width="11" height="11"></td>
+<td background="../apple_gui/tab_pane_B.png" height="11"></td>
+<td background="../apple_gui/tab_pane_BR.png" width="11" height="11"></td></tr>
+</table>
+
+</font>
+</body>
+</html>

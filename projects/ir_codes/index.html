@@ -1,0 +1,48 @@
+<html>
+<head>
+<title>
+Ben Boldt - IR Code Player
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">IR Code Player</font><br><br>
+<br>
+</center>
+
+Situation:  It's winter break, 2009-2010.  I'm bored.  I have this awesome 9S12 microcontroller.<br><br>
+
+I stumbled upon <a href="http://www.remotecentral.com/cgi-bin/codes/">Remote Central</a> a while back, and it has a bunch of hex dumps for different remote control IR codes.  These dumps describe precisely how to blink an infrared LED to control many different devices.  They aren't just a dump of the actual data sent, however.<br><br>
+
+Each hex dump starts with a header that most notably defines the carrier frequency of the LED.  A logic zero in infrared is simply the lack of any infrared light.  But a logic 1 in infrared can't just be an infrared LED being turned on.  It has to pulse at a certain frequency, called a carrier frequency.  This is so that the signal resonates in the receiver and extraneous infrared light from other sources is ignored.<br><br>
+
+The header also describes some other things like lengths of data, whether the IR code has a preamble, etc.  After that, the hex dump then is a record of how many pulses of the carrier frequency that the LED is to be turned on, then how many pulses it is to be turned off.  For a more detailed and accurate spec on this (if you're interested), see <a href="http://www.remotecentral.com/features/irdisp1.htm">this page</a>.  It's pretty convoluted, but the info is in there somewhere.<br><br>
+
+As a proof of concept, I wanted to design a program based entirely on interrupts for my 9S12 microcontroller, and hook an IR LED directly to one of the ports in series with a resistor.  The goal of being entirely interrupt-based has the added value of running in the background of some entirely different program.  So for example, I could make a program that would control various AV appliances based on any sort of input, be it buttons, the current date & time, how bright it is in the room, a loud noise, temperature, you name it.  All I need is the right sensor(s) and to poll the ADC ports accordingly.<br><br>
+
+To do this, I immediately used Port T.  This port has output compare capability.  I used the output compare to establish the carrier frequency.  The LED will turn on and off on its own at the carrier frequency without any intervention of my own, except initially to set up the output compare period.  I am then able to tap the output compare via a software interrupt.  This allows me to write a small subroutine that keeps count of the number of times the LED has turned on and off.<br><br>
+
+By counting these toggles and comparing to the hex dump, I am able to compare the count with the value in the dump.  When the value is reached, I change the behavior of the output compare to just leave the LED off.  The output compares are still occurring and still causing interrupts however.  These are also counted and when the count matches the dump, the program proceeds the next value in the dump, changes the behavior to turn the LED on and off, and counts again.  It repeats this until the end of the data, then repeats.<br><br>
+
+Because the entire program is interrupt-based, only a few things need to be set up initially, then the main program sits and "spins".  It accomplishes that with something like this:<br><br>
+
+(loop) goto loop<br><br>
+
+There needs to be a way to keep track of where in the dump I am because once I return from the interrupt subroutine, maybe the pointer could be used elsewhere and not be viable when the interrupt is entered again.  This program currently spins in the main program, so the pointers would always be viable, but this program is a proof of concept.  I want it to be able to be portable and adaptable enough to run in the background of a completely unrelated program, and even be called upon by the other program.  It's just good practice to store anything you need later in memory during an interrupt subroutine anyway.  I accomplished this seemingly complicated task by storing pointers in memory at the end of the interrupt subroutine, and retrieving them at the beginning.  Seems like a lot of explanation for such a little thing, but really the concept is what this is about.<br><br>
+
+The program works.  One microcontroller, one LED, one resistor.  I was able to successfully replicate buttons on a Dish Network satellite receiver and control the receiver.  The codes in the database are not perfect though!  It was very finicky at first.  So I took the real remote apart, and for the lack of a logic analyzer, I connected the LED through a resistor to the sound input port on my computer.  I hit record, then zoomed in on the "sound" waves.  With a few tweaks I found, I polished a couple of the hex dumps and they worked great!  The program could be developed a bit further to actually calculate the carrier frequency on its own and to support multiple codes, but the concept is proven.  The code is there if I need it for some crazy project some day.<br><br>
+
+If you would like to see the ASM code, <a href="./ir_codes/remote.asm">click here</a> to download.
+
+<br><br>&nbsp;
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>

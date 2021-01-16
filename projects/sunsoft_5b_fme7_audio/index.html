@@ -1,0 +1,56 @@
+<html>
+<head>
+<title>
+Ben Boldt - SunSoft 5b Mapper Made From SunSoft FME-7 + AY-3-8910
+</title>
+<base href="../" />
+</head>
+
+<body background="../apple_gui/stripes_gray.gif">
+
+<script src="./pagetop_projects.js"></script>
+
+<center>
+<br>
+<font size="+3">SunSoft 5b Mapper Made From SunSoft FME-7 + AY-3-8910</font><br><br>
+<br>
+</center>
+
+SunSoft made a very cool Nintendo game called "Gimmick!" in Japan and "Mr. Gimmick" in Europe.  In some ways, this is the most advanced Nintendo game ever made.  In its SunSoft 5b mapper chip, it had its own sound generator to add extra audio channels to the Nintendo.  Unfortunately, it came way too late, when people had moved on to Super Nintendo.  Maybe its name wasn't too appealing either.  It never sold well, so nowadays it's really valuable and hard to find.<br><br>
+
+Even though Gimmick is the only game to utilize the sound generator inside of the Sunsoft 5b, other games actually did come with this chip.  It is possible to take one of these games and modify it to run Gimmick! with audio, but unfortunately, all of those other games are pretty rare and valuable too!  It's better to leave those as untouched original.<br><br>
+
+People at <a href="http://forums.nesdev.com/viewtopic.php?f=9&t=3480">nesdev.com</a> realized that SunSoft 5b is compatible with SunSoft FME-7, except that it has no sound generator built-in.  They also realized that the missing sound generator is a common Yamaha YM2149.  They even successfully hooked these chips up to a FME-7 cartridge and got the sound to work!  So, I had to give this a try.  I found a boring Famicom game called "Dodge Danpei" on eBay for $7.  This contained the FME-7 and just enough space to add on the extra chips.<br><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/dodge_danpei.jpg"><br>Dodge Danpei Cartridge</center><br>
+
+The flash ROMs that I planned to put into this cartridge were twice as big as they needed to be, so I wanted to add a second game called "Hebereke".  In order to switch between games, I had to detect a gap in toggles to the CPU A0 line.  A coworker created this circuit for me.  It has a rising edge after 10 msec without toggles.  Then it has a falling edge right away when toggling continues.  This edge can be used to clock a flip-flop to change the highest address bit of the Flash ROMs, which selects the other game.<br><br><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/john.gif"><br>John's Missing Pulse Detector</center><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/reset_bank_select.gif"><br>Reset and Bank Select Functions</center><br>
+
+I have included a brownout detect IC that initializes the flip-flop and the AY-3-8910 when power is first turned on.  This guarantees that the first game is Gimmick.  This reset circuit also holds the AY-3-8910 in reset when playing Hebereke, which does not support expansion audio.  I believe that notes from Gimmick could get stuck when switching to Hebereke if this function was not here.<br><br><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/bdir.gif"><br>BDIR Logic</center><br>
+
+The BDIR pin needs special logic to interface the AY-3-8910 to the Nintendo.  I have accomplished this with a quad 2-input NOR gate.<br><br><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/back_before_audio.jpg"><br>Back of board before adding AY-3-8910</center><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/ay-3-8910.jpg"><br>AY-3-8910 chip in original RadioShack packaging!</center><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/audio.gif"><br>Analog Audio Channel Hookup</center><br><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/front.jpg"><br>Front of finished board</center><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/back.jpg"><br>Back of finished board</center><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/gimmick.jpg"><br>Gimmick!</center><br>
+
+<center><img src="./sunsoft_5b_fme7_audio/hebereke.jpg"><br>Hebereke</center><br>
+
+<script src="./pagebottom_gray.js"></script>
+
+</body>
+</html>
